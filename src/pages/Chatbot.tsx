@@ -165,31 +165,55 @@ export default function Chatbot() {
             <CardContent className="flex-1 flex flex-col">
               <ScrollArea className="flex-1 pr-4 mb-4">
                 <div className="space-y-4">
-                  <AnimatePresence>
+                  <AnimatePresence mode="popLayout">
                     {messages.map((msg) => (
                       <motion.div
                         key={msg.id}
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.3 }}
+                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                        transition={{ 
+                          type: "spring", 
+                          stiffness: 300, 
+                          damping: 25,
+                          duration: 0.4 
+                        }}
                         className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                       >
-                        <div
+                        <motion.div
+                          initial={msg.sender === "bot" ? { x: -20 } : { x: 20 }}
+                          animate={{ x: 0 }}
+                          transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                          whileHover={{ 
+                            scale: 1.02,
+                            transition: { duration: 0.2 }
+                          }}
                           className={`max-w-[80%] p-4 rounded-2xl ${
                             msg.sender === "user"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-card border-2 border-purple-200 dark:border-purple-800"
+                              ? "bg-primary text-primary-foreground shadow-lg"
+                              : "bg-card border-2 border-purple-200 dark:border-purple-800 shadow-md"
                           }`}
                         >
-                          <p className="text-sm leading-relaxed">{msg.text}</p>
-                          <p className="text-xs opacity-70 mt-2">
+                          <motion.p 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.1, duration: 0.3 }}
+                            className="text-sm leading-relaxed"
+                          >
+                            {msg.text}
+                          </motion.p>
+                          <motion.p 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.7 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
+                            className="text-xs opacity-70 mt-2"
+                          >
                             {msg.timestamp.toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
-                          </p>
-                        </div>
+                          </motion.p>
+                        </motion.div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
