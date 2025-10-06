@@ -5,7 +5,7 @@ import { Navigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Smile, TrendingUp, Users, Heart, BookOpen, Calendar } from "lucide-react";
+import { Smile, TrendingUp, Users, Heart, BookOpen, Calendar, Home } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Dashboard() {
@@ -36,12 +36,22 @@ export default function Dashboard() {
           transition={{ duration: 0.5 }}
         >
           <div className="mb-8">
-            <h1 className="text-4xl font-bold tracking-tight mb-2">
-              Welcome back, {user?.name || "Friend"} 👋
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              How are you feeling today?
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-bold tracking-tight mb-2">
+                  Welcome back, {user?.name || "Friend"} 👋
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  How are you feeling today?
+                </p>
+              </div>
+              <Link to="/">
+                <Button variant="outline" size="lg" className="gap-2">
+                  <Home className="h-5 w-5" />
+                  Return to Home
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -79,17 +89,24 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer">
+              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
                 <Link to="/support-circles">
                   <CardHeader>
-                    <Users className="h-8 w-8 text-purple-500 mb-2" />
-                    <CardTitle>Support Circles</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <Users className="h-8 w-8 text-purple-500 mb-2" />
+                      <span className="text-xs font-semibold bg-purple-500 text-white px-2 py-1 rounded-full">
+                        Peer Support
+                      </span>
+                    </div>
+                    <CardTitle className="text-purple-700 dark:text-purple-300">
+                      Support Circles
+                    </CardTitle>
                     <CardDescription>
-                      Connect with peers anonymously
+                      Connect with peers anonymously in safe spaces
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="default" className="w-full bg-purple-500 hover:bg-purple-600">
                       Join a Circle
                     </Button>
                   </CardContent>
