@@ -16,6 +16,7 @@ import CalmHub from "./pages/CalmHub.tsx";
 import Journal from "./pages/Journal.tsx";
 import Gratitude from "./pages/Gratitude.tsx";
 import Counselor from "./pages/Counselor.tsx";
+import Chatbot from "./pages/Chatbot.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import "./types/global.d.ts";
 
@@ -64,6 +65,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/journal" element={<Journal />} />
             <Route path="/gratitude" element={<Gratitude />} />
             <Route path="/counselor" element={<Counselor />} />
+            <Route path="/chatbot" element={<Chatbot />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

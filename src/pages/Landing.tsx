@@ -96,8 +96,52 @@ export default function Landing() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-16 relative"
         >
+          {/* Floating animations */}
+          <motion.div
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, 5, 0],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute top-10 left-10 text-6xl opacity-20"
+          >
+            💜
+          </motion.div>
+          <motion.div
+            animate={{
+              y: [0, 20, 0],
+              x: [0, 10, 0],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute top-20 right-20 text-5xl opacity-20"
+          >
+            🫧
+          </motion.div>
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, -5, 0],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute bottom-10 left-1/4 text-4xl opacity-20"
+          >
+            💜
+          </motion.div>
+
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -112,17 +156,23 @@ export default function Landing() {
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Your Mental Health
             <br />
-            Matters
+            Matters 💜
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            A safe, supportive space for college students to track moods, connect with peers, and access professional help—all anonymously.
+            Connect with peers, track your moods, and get real help — all anonymously.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/support-circles">
+              <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
+                Join the Community
+                <Users className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
             <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-              <Button size="lg" className="text-lg px-8 py-6">
-                {isAuthenticated ? "Go to Dashboard" : "Start Your Journey"}
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                Explore Dashboard
                 <Sparkles className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -333,11 +383,26 @@ export default function Landing() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            Built by Team MindConnect | SDG 3: Good Health & Well-Being
-          </p>
+      <footer className="bg-[#2C2F4A] dark:bg-gray-900 border-t-4 border-[#98FF98] py-12 mt-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-6">
+            <p className="text-white text-sm mb-4">
+              © 2025 Team MindConnect | SDG 3: Good Health & Well-Being | Built with ❤️ by Students
+            </p>
+            <div className="flex justify-center gap-6 text-sm">
+              <a href="#" className="text-[#98FF98] hover:text-[#C7B8EA] transition-colors">
+                Privacy Policy
+              </a>
+              <span className="text-gray-400">|</span>
+              <a href="#" className="text-[#98FF98] hover:text-[#C7B8EA] transition-colors">
+                Feedback
+              </a>
+              <span className="text-gray-400">|</span>
+              <a href="#" className="text-[#98FF98] hover:text-[#C7B8EA] transition-colors">
+                Contact Us
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

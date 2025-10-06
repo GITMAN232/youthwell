@@ -60,9 +60,9 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer">
-                <Link to="/mood-tracker">
-                  <CardHeader>
+              <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col">
+                <Link to="/mood-tracker" className="flex-1 flex flex-col">
+                  <CardHeader className="flex-1">
                     <div className="flex items-center justify-between">
                       <Smile className="h-8 w-8 text-blue-500" />
                       <span className="text-3xl">{todayMood?.emoji || "😊"}</span>
@@ -73,12 +73,15 @@ export default function Dashboard() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <TrendingUp className="h-4 w-4 text-green-500" />
                       <span className="text-sm font-medium">
                         {moodStreak?.currentStreak || 0} day streak
                       </span>
                     </div>
+                    <Button variant="outline" className="w-full">
+                      Track Now
+                    </Button>
                   </CardContent>
                 </Link>
               </Card>
@@ -89,9 +92,9 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-                <Link to="/support-circles">
-                  <CardHeader>
+              <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+                <Link to="/support-circles" className="flex-1 flex flex-col">
+                  <CardHeader className="flex-1">
                     <div className="flex items-center justify-between">
                       <Users className="h-8 w-8 text-purple-500 mb-2" />
                       <span className="text-xs font-semibold bg-purple-500 text-white px-2 py-1 rounded-full">
@@ -102,7 +105,7 @@ export default function Dashboard() {
                       Support Circles
                     </CardTitle>
                     <CardDescription>
-                      Connect with peers anonymously in safe spaces
+                      Join a peer group
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -119,18 +122,18 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer">
-                <Link to="/calm-hub">
-                  <CardHeader>
+              <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col">
+                <Link to="/calm-hub" className="flex-1 flex flex-col">
+                  <CardHeader className="flex-1">
                     <Heart className="h-8 w-8 text-pink-500 mb-2" />
                     <CardTitle>Calm Hub</CardTitle>
                     <CardDescription>
-                      Mindfulness & relaxation tools
+                      Relaxation tools & breathing guides
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button variant="outline" className="w-full">
-                      Start Breathing
+                      Start Session
                     </Button>
                   </CardContent>
                 </Link>
@@ -142,13 +145,13 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
             >
-              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer">
-                <Link to="/journal">
-                  <CardHeader>
+              <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col">
+                <Link to="/journal" className="flex-1 flex flex-col">
+                  <CardHeader className="flex-1">
                     <BookOpen className="h-8 w-8 text-amber-500 mb-2" />
                     <CardTitle>Journal</CardTitle>
                     <CardDescription>
-                      Reflect and write your thoughts
+                      Reflect your thoughts
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -165,9 +168,9 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer">
-                <Link to="/gratitude">
-                  <CardHeader>
+              <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col">
+                <Link to="/gratitude" className="flex-1 flex flex-col">
+                  <CardHeader className="flex-1">
                     <Heart className="h-8 w-8 text-rose-500 mb-2" />
                     <CardTitle>Gratitude Wall</CardTitle>
                     <CardDescription>
@@ -188,18 +191,18 @@ export default function Dashboard() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <Card className="border-2 hover:shadow-lg transition-shadow cursor-pointer">
-                <Link to="/counselor">
-                  <CardHeader>
+              <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col">
+                <Link to="/counselor" className="flex-1 flex flex-col">
+                  <CardHeader className="flex-1">
                     <Calendar className="h-8 w-8 text-teal-500 mb-2" />
                     <CardTitle>Talk to Counselor</CardTitle>
                     <CardDescription>
-                      Professional support available
+                      Request private session
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button variant="outline" className="w-full">
-                      Request Appointment
+                      Book Now
                     </Button>
                   </CardContent>
                 </Link>
