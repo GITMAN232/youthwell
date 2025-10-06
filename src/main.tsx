@@ -9,6 +9,13 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 import Landing from "./pages/Landing.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
+import MoodTracker from "./pages/MoodTracker.tsx";
+import SupportCircles from "./pages/SupportCircles.tsx";
+import CalmHub from "./pages/CalmHub.tsx";
+import Journal from "./pages/Journal.tsx";
+import Gratitude from "./pages/Gratitude.tsx";
+import Counselor from "./pages/Counselor.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import "./types/global.d.ts";
 
@@ -49,7 +56,14 @@ createRoot(document.getElementById("root")!).render(
           <RouteSyncer />
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<AuthPage redirectAfterAuth="/" />} /> {/* TODO: change redirect after auth to correct page */}
+            <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/mood-tracker" element={<MoodTracker />} />
+            <Route path="/support-circles" element={<SupportCircles />} />
+            <Route path="/calm-hub" element={<CalmHub />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/gratitude" element={<Gratitude />} />
+            <Route path="/counselor" element={<Counselor />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
