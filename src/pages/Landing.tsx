@@ -1,17 +1,97 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, BookOpen, Smile, Shield, Sparkles } from "lucide-react";
+import { Heart, Users, BookOpen, Smile, Shield, Sparkles, Brain, Moon, Sun } from "lucide-react";
 import { Link } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
+import { useState } from "react";
+
+const teamMembers = [
+  { name: "P. Santhosh", role: "Team Lead", id: "2023003991", color: "from-purple-100 to-pink-100" },
+  { name: "Golla Vinay Kumar", role: "UI/UX & Research", id: "2023004418", color: "from-blue-100 to-purple-100" },
+  { name: "B. Kiran Nanda Kumar", role: "Technical Developer", id: "2023003109", color: "from-green-100 to-blue-100" },
+  { name: "R. Ashwini", role: "Content & Outreach", id: "2023003535", color: "from-pink-100 to-purple-100" },
+  { name: "K. Sai Theja", role: "Survey & Analytics", id: "2023003134", color: "from-yellow-100 to-pink-100" },
+  { name: "K. Abhiram", role: "Prototype Design", id: "2023004291", color: "from-indigo-100 to-purple-100" },
+];
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
+  const [isDark, setIsDark] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+
+  const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className={`min-h-screen ${isDark ? 'dark bg-[#2C2F4A]' : 'bg-gradient-to-br from-[#F9F6EE] via-purple-50 to-pink-50'}`}>
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#2C2F4A]/90 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2 text-xl font-bold">
+                <Brain className="h-6 w-6 text-purple-600" />
+                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  MindConnect
+                </span>
+              </div>
+              
+              <div className="hidden md:flex items-center gap-6">
+                {[
+                  { id: "home", label: "Home" },
+                  { id: "community", label: "Community" },
+                  { id: "mood-tracking", label: "Mood Tracking" },
+                  { id: "chatbot", label: "Chatbot" },
+                  { id: "team", label: "Meet the Team" },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className={`text-sm font-medium transition-all relative group ${
+                      activeSection === item.id
+                        ? 'text-purple-600 dark:text-[#98FF98]'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-[#98FF98]'
+                    }`}
+                  >
+                    {item.label}
+                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-[#98FF98] transition-all duration-300 ${
+                      activeSection === item.id ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsDark(!isDark)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5 text-yellow-400" />
+                ) : (
+                  <Moon className="h-5 w-5 text-gray-700" />
+                )}
+              </button>
+              
+              <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
+                <Button variant="default" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+      <div id="home" className="pt-24 max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -51,6 +131,7 @@ export default function Landing() {
 
         {/* Features Grid */}
         <motion.div
+          id="community"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
@@ -149,6 +230,7 @@ export default function Landing() {
 
         {/* Stats Section */}
         <motion.div
+          id="mood-tracking"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8 }}
@@ -173,8 +255,60 @@ export default function Landing() {
           </div>
         </motion.div>
 
+        {/* Meet the Team Section */}
+        <motion.div
+          id="team"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-16"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold tracking-tight mb-4">
+              Meet Our Team 💫
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              The creative minds behind MindConnect.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {teamMembers.map((member, index) => (
+              <motion.div
+                key={member.id}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+              >
+                <Card className={`border-2 h-full bg-gradient-to-br ${member.color} shadow-lg hover:shadow-[0_0_30px_rgba(199,184,234,0.5)] transition-all duration-300`}>
+                  <CardContent className="pt-8 text-center">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl"
+                    >
+                      {member.name.charAt(0)}
+                    </motion.div>
+                    <h3 className="text-xl font-bold mb-2">{member.name}</h3>
+                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">
+                      {member.role}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      ID: {member.id}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
         {/* CTA Section */}
         <motion.div
+          id="chatbot"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8, duration: 0.8 }}
@@ -197,6 +331,15 @@ export default function Landing() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            Built by Team MindConnect | SDG 3: Good Health & Well-Being
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
