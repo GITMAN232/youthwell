@@ -7,12 +7,54 @@ import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 
 const teamMembers = [
-  { name: "P. Santhosh", role: "Team Lead", id: "2023003991", color: "from-purple-100 to-pink-100" },
-  { name: "Golla Vinay Kumar", role: "UI/UX & Research", id: "2023004418", color: "from-blue-100 to-purple-100" },
-  { name: "B. Kiran Nanda Kumar", role: "Technical Developer", id: "2023003109", color: "from-green-100 to-blue-100" },
-  { name: "R. Ashwini", role: "Content & Outreach", id: "2023003535", color: "from-pink-100 to-purple-100" },
-  { name: "K. Sai Theja", role: "Survey & Analytics", id: "2023003134", color: "from-yellow-100 to-pink-100" },
-  { name: "K. Abhiram", role: "Prototype Design", id: "2023004291", color: "from-indigo-100 to-purple-100" },
+  { 
+    name: "P. Santhosh", 
+    role: "Team Lead", 
+    id: "2023003991", 
+    color: "from-purple-100 to-pink-100",
+    icon: "🚀",
+    description: "Leading the vision and coordinating our mission to transform student mental health support."
+  },
+  { 
+    name: "Golla Vinay Kumar", 
+    role: "UI/UX & Research", 
+    id: "2023004418", 
+    color: "from-blue-100 to-purple-100",
+    icon: "🎨",
+    description: "Designing intuitive experiences and conducting user research to understand student needs."
+  },
+  { 
+    name: "B. Kiran Nanda Kumar", 
+    role: "Technical Developer", 
+    id: "2023003109", 
+    color: "from-green-100 to-blue-100",
+    icon: "💻",
+    description: "Building robust and scalable technical solutions for our mental health platform."
+  },
+  { 
+    name: "R. Ashwini", 
+    role: "Content & Outreach", 
+    id: "2023003535", 
+    color: "from-pink-100 to-purple-100",
+    icon: "✍️",
+    description: "Creating meaningful content and building community connections with students."
+  },
+  { 
+    name: "K. Sai Theja", 
+    role: "Survey & Analytics", 
+    id: "2023003134", 
+    color: "from-yellow-100 to-pink-100",
+    icon: "📊",
+    description: "Analyzing data and insights to understand mental health patterns and trends."
+  },
+  { 
+    name: "K. Abhiram", 
+    role: "Prototype Design", 
+    id: "2023004291", 
+    color: "from-indigo-100 to-purple-100",
+    icon: "🎯",
+    description: "Crafting interactive prototypes and bringing our design concepts to life."
+  },
 ];
 
 export default function Landing() {
@@ -333,21 +375,27 @@ export default function Landing() {
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 whileHover={{ y: -8, scale: 1.02 }}
               >
-                <Card className={`border-2 h-full bg-gradient-to-br ${member.color} shadow-lg hover:shadow-[0_0_30px_rgba(199,184,234,0.5)] transition-all duration-300`}>
-                  <CardContent className="pt-8 text-center">
+                <Card className={`border-2 h-full bg-gradient-to-br ${member.color} shadow-lg hover:shadow-[0_0_30px_rgba(199,184,234,0.5)] transition-all duration-300 overflow-hidden`}>
+                  <CardContent className="pt-8 text-center px-6">
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: "spring", stiffness: 300 }}
-                      className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl"
+                      className="w-28 h-28 mx-auto mb-5 rounded-full bg-gradient-to-br from-green-200 via-blue-200 to-purple-200 flex items-center justify-center text-5xl shadow-xl relative"
                     >
-                      {member.name.charAt(0)}
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/40 to-transparent"></div>
+                      <span className="relative z-10">{member.icon}</span>
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-2">{member.name}</h3>
-                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">
+                    <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100">
+                      {member.name}
+                    </h3>
+                    <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold mb-2">
                       {member.role}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                       ID: {member.id}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      {member.description}
                     </p>
                   </CardContent>
                 </Card>
