@@ -54,7 +54,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -190,6 +190,32 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6 }}
+            >
+              <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col">
+                <Link to="/chatbot" className="flex-1 flex flex-col">
+                  <CardHeader className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <Smile className="h-8 w-8 text-blue-500 mb-2" />
+                      <span className="text-2xl">🤖</span>
+                    </div>
+                    <CardTitle>AI Wellness Companion</CardTitle>
+                    <CardDescription>
+                      Chat with your wellness guide
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full">
+                      Start Chat
+                    </Button>
+                  </CardContent>
+                </Link>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.7 }}
             >
               <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col">
                 <Link to="/counselor" className="flex-1 flex flex-col">
