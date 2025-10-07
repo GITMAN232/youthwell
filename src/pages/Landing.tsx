@@ -374,28 +374,34 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                whileHover={{ y: -8, scale: 1.02 }}
+                whileHover={{ 
+                  y: -12, 
+                  scale: 1.03,
+                  rotateY: 2,
+                  transition: { type: "spring", stiffness: 300, damping: 20 }
+                }}
               >
-                <Card className={`border-2 h-full bg-gradient-to-br ${member.color} shadow-lg hover:shadow-[0_0_30px_rgba(199,184,234,0.5)] transition-all duration-300 overflow-hidden`}>
+                <Card className={`border-2 h-full bg-gradient-to-br ${member.color} shadow-lg hover:shadow-[0_0_40px_rgba(199,184,234,0.7)] hover:border-purple-400 transition-all duration-300 overflow-hidden relative group`}>
                   <CardContent className="pt-8 text-center px-6">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 via-blue-400/0 to-pink-400/0 group-hover:from-purple-400/10 group-hover:via-blue-400/10 group-hover:to-pink-400/10 transition-all duration-500"></div>
                     <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                      className="w-28 h-28 mx-auto mb-5 rounded-full bg-gradient-to-br from-green-200 via-blue-200 to-purple-200 flex items-center justify-center text-5xl shadow-xl relative"
+                      whileHover={{ scale: 1.15, rotate: 10 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                      className="w-28 h-28 mx-auto mb-5 rounded-full bg-gradient-to-br from-green-200 via-blue-200 to-purple-200 flex items-center justify-center text-5xl shadow-xl relative group-hover:shadow-2xl transition-shadow duration-300"
                     >
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/40 to-transparent"></div>
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/40 to-transparent group-hover:from-white/60 transition-all duration-300"></div>
                       <span className="relative z-10">{member.icon}</span>
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100">
+                    <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100 relative z-10 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
                       {member.name}
                     </h3>
-                    <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold mb-2">
+                    <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold mb-2 relative z-10 group-hover:scale-105 transition-transform duration-300">
                       {member.role}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 relative z-10">
                       ID: {member.id}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed relative z-10 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">
                       {member.description}
                     </p>
                   </CardContent>
