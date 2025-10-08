@@ -5,13 +5,15 @@ import { Navigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Smile, TrendingUp, Users, Heart, BookOpen, Calendar, Home } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Smile, TrendingUp, Users, Heart, BookOpen, Calendar, Home, Shield } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const moodStreak = useQuery(api.moods.getMoodStreak);
   const recentMoods = useQuery(api.moods.getUserMoods);
+  const pendingRequestsCount = useQuery(api.supportCircles.getPendingRequestsCount);
 
   if (isLoading) {
     return (
@@ -26,6 +28,10 @@ export default function Dashboard() {
   }
 
   const todayMood = recentMoods && recentMoods.length > 0 ? recentMoods[0] : null;
+
+  // Check if user is admin
+  const adminEmails = ["spachipa2@gitam.in"];
+  const isAdmin = user?.email && adminEmails.includes(user.email);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -55,6 +61,41 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            {/* Admin Panel Card - Only visible to admins */}
+            {isAdmin && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Card className="border-2 hover:shadow-lg transition-all h-full flex flex-col bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
+                  <Link to="/admin-panel" className="flex-1 flex flex-col">
+                    <CardHeader className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <Shield className="h-8 w-8 text-purple-600 mb-2" />
+                        {pendingRequestsCount && pendingRequestsCount > 0 && (
+                          <Badge variant="destructive" className="text-xs">
+                            {pendingRequestsCount} pending
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-purple-700 dark:text-purple-300">
+                        Admin Panel
+                      </CardTitle>
+                      <CardDescription>
+                        Manage circle requests
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button variant="default" className="w-full bg-purple-600 hover:bg-purple-700">
+                        Open Panel
+                      </Button>
+                    </CardContent>
+                  </Link>
+                </Card>
+              </motion.div>
+            )}
+
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

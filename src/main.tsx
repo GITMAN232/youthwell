@@ -12,6 +12,7 @@ import Landing from "./pages/Landing.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import MoodTracker from "./pages/MoodTracker.tsx";
 import SupportCircles from "./pages/SupportCircles.tsx";
+import AdminPanel from "./pages/AdminPanel.tsx";
 import CalmHub from "./pages/CalmHub.tsx";
 import Journal from "./pages/Journal.tsx";
 import Gratitude from "./pages/Gratitude.tsx";
@@ -61,6 +62,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/mood-tracker" element={<MoodTracker />} />
             <Route path="/support-circles" element={<SupportCircles />} />
+            <Route path="/admin-panel" element={<AdminPanel />} />
             <Route path="/calm-hub" element={<CalmHub />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/gratitude" element={<Gratitude />} />

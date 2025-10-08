@@ -45,6 +45,17 @@ const schema = defineSchema(
       isActive: v.boolean(),
     }).index("by_active", ["isActive"]),
 
+    circleRequests: defineTable({
+      userId: v.id("users"),
+      name: v.string(),
+      description: v.string(),
+      theme: v.string(),
+      status: v.string(), // "pending", "approved", "rejected"
+      rejectionReason: v.optional(v.string()),
+    })
+      .index("by_status", ["status"])
+      .index("by_user", ["userId"]),
+
     circleMessages: defineTable({
       circleId: v.id("supportCircles"),
       userId: v.id("users"),
