@@ -16,8 +16,20 @@ import { Id } from "@/convex/_generated/dataModel";
 
 export default function AdminPanel() {
   const { isLoading, isAuthenticated, user } = useAuth();
-  const allRequests = useQuery(api.supportCircles.getAllCircleRequests, {});
-  const pendingRequests = useQuery(api.supportCircles.getAllCircleRequests, { status: "pending" });
+  
+  // Check if user is admin
+  const adminEmails = ["spachipa2@gitam.in"];
+  const isAdmin = user?.email && adminEmails.includes(user.email);
+  
+  // Only query if authenticated and is admin
+  const allRequests = useQuery(
+    api.supportCircles.getAllCircleRequests,
+    isAuthenticated && isAdmin ? {} : "skip"
+  );
+  const pendingRequests = useQuery(
+    api.supportCircles.getAllCircleRequests,
+    isAuthenticated && isAdmin ? { status: "pending" } : "skip"
+  );
   const approveRequest = useMutation(api.supportCircles.approveCircleRequest);
   const rejectRequest = useMutation(api.supportCircles.rejectCircleRequest);
 
@@ -37,10 +49,6 @@ export default function AdminPanel() {
   if (!isAuthenticated) {
     return <Navigate to="/auth" />;
   }
-
-  // Check if user is admin
-  const adminEmails = ["spachipa2@gitam.in"];
-  const isAdmin = user?.email && adminEmails.includes(user.email);
 
   if (!isAdmin) {
     return (

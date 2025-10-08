@@ -5,11 +5,23 @@ import { getCurrentUser } from "./users";
 
 // Helper to check if user is admin
 const isAdmin = async (ctx: any) => {
-  const user = await getCurrentUser(ctx);
-  if (!user) return false;
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
+    console.log("No userId found");
+    return false;
+  }
   
+  const user = await ctx.db.get(userId);
+  if (!user) {
+    console.log("No user found for userId:", userId);
+    return false;
+  }
+  
+  console.log("Checking admin access for user:", user.email);
   const adminEmails = ["spachipa2@gitam.in"];
-  return user.email && adminEmails.includes(user.email);
+  const isAdminUser = user.email && adminEmails.includes(user.email);
+  console.log("Is admin:", isAdminUser);
+  return isAdminUser;
 };
 
 export const createCircle = mutation({
