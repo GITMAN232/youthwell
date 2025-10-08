@@ -86,26 +86,37 @@ export default function Landing() {
               
               <div className="hidden md:flex items-center gap-6">
                 {[
-                  { id: "home", label: "Home" },
-                  { id: "community", label: "Community" },
-                  { id: "mood-tracking", label: "Mood Tracking" },
-                  { id: "chatbot", label: "Chatbot" },
-                  { id: "team", label: "Meet the Team" },
+                  { id: "home", label: "Home", type: "scroll" },
+                  { id: "community", label: "Community", type: "link", path: "/support-circles" },
+                  { id: "mood-tracking", label: "Mood Tracking", type: "link", path: "/mood-tracker" },
+                  { id: "chatbot", label: "Chatbot", type: "link", path: "/chatbot" },
+                  { id: "team", label: "Meet the Team", type: "scroll" },
                 ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className={`text-sm font-medium transition-all relative group ${
-                      activeSection === item.id
-                        ? 'text-purple-600 dark:text-[#98FF98]'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-[#98FF98]'
-                    }`}
-                  >
-                    {item.label}
-                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-[#98FF98] transition-all duration-300 ${
-                      activeSection === item.id ? 'w-full' : 'w-0 group-hover:w-full'
-                    }`} />
-                  </button>
+                  item.type === "link" ? (
+                    <Link
+                      key={item.id}
+                      to={item.path!}
+                      className="text-sm font-medium transition-all relative group text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-[#98FF98]"
+                    >
+                      {item.label}
+                      <span className="absolute -bottom-1 left-0 h-0.5 bg-[#98FF98] transition-all duration-300 w-0 group-hover:w-full" />
+                    </Link>
+                  ) : (
+                    <button
+                      key={item.id}
+                      onClick={() => scrollToSection(item.id)}
+                      className={`text-sm font-medium transition-all relative group ${
+                        activeSection === item.id
+                          ? 'text-purple-600 dark:text-[#98FF98]'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-[#98FF98]'
+                      }`}
+                    >
+                      {item.label}
+                      <span className={`absolute -bottom-1 left-0 h-0.5 bg-[#98FF98] transition-all duration-300 ${
+                        activeSection === item.id ? 'w-full' : 'w-0 group-hover:w-full'
+                      }`} />
+                    </button>
+                  )
                 ))}
               </div>
             </div>
