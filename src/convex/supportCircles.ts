@@ -11,7 +11,7 @@ const isAdmin = async (ctx: any) => {
   const user = await ctx.db.get(userId);
   if (!user) return false;
   
-  const adminEmails = ["spachipa2@gitam.in"];
+  const adminEmails = process.env.ADMIN_EMAILS?.split(",") || ["spachipa2@gitam.in"];
   return !!(user.email && adminEmails.includes(user.email));
 };
 

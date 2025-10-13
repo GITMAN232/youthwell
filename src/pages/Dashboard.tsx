@@ -30,7 +30,7 @@ export default function Dashboard() {
   const todayMood = recentMoods && recentMoods.length > 0 ? recentMoods[0] : null;
 
   // Check if user is admin
-  const adminEmails = ["spachipa2@gitam.in"];
+  const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || ["spachipa2@gitam.in"];
   const isAdmin = user?.email && adminEmails.includes(user.email);
 
   return (

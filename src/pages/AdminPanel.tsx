@@ -18,7 +18,7 @@ export default function AdminPanel() {
   const { isLoading, isAuthenticated, user } = useAuth();
   
   // Check if user is admin
-  const adminEmails = ["spachipa2@gitam.in"];
+  const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || ["spachipa2@gitam.in"];
   const isAdmin = user?.email && adminEmails.includes(user.email);
   
   // Only query if authenticated and is admin
