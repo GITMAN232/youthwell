@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Send, Sparkles, Leaf } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,6 +45,7 @@ const STORAGE_KEYS = {
 
 export default function Chatbot() {
   const { isLoading, isAuthenticated } = useAuth();
+  const chatEndRef = useRef<HTMLDivElement>(null);
   
   // Load messages from localStorage or use default
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -52,7 +53,6 @@ export default function Chatbot() {
       const saved = localStorage.getItem(STORAGE_KEYS.MESSAGES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Convert timestamp strings back to Date objects
         return parsed.map((msg: Message) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
@@ -61,7 +61,6 @@ export default function Chatbot() {
     } catch (error) {
       console.error("Failed to load messages from localStorage:", error);
     }
-    // Default welcome message
     return [
       {
         id: "1",
@@ -74,7 +73,6 @@ export default function Chatbot() {
   
   const [inputText, setInputText] = useState("");
   
-  // Load mode from localStorage or use default
   const [mode, setMode] = useState<BotMode>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.MODE);
@@ -89,7 +87,12 @@ export default function Chatbot() {
   
   const [isTyping, setIsTyping] = useState(false);
 
-  // Save messages to localStorage whenever they change
+  // Auto-scroll to latest message
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Save messages to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
@@ -98,7 +101,7 @@ export default function Chatbot() {
     }
   }, [messages]);
 
-  // Save mode to localStorage whenever it changes
+  // Save mode to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.MODE, mode);
@@ -109,8 +112,8 @@ export default function Chatbot() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F2FA] to-[#E0F7FA]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7C83FD]"></div>
       </div>
     );
   }
@@ -120,44 +123,43 @@ export default function Chatbot() {
   }
 
   const getAIResponse = async (userMessage: string): Promise<string> => {
-    const apiKey = import.meta.env.VITE_AI_API_KEY;
+    const geminiApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
     
-    // If no API key, use fallback responses
-    if (!apiKey) {
-      return getFallbackResponse(userMessage);
-    }
+    // Try Gemini API first if key is available
+    if (geminiApiKey) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ 
+                parts: [{ 
+                  text: `You are a wellness companion for college students. Respond in a ${mode === "mindful" ? "calm, mindful, and supportive" : "energetic, motivational, and encouraging"} tone. User message: ${userMessage}` 
+                }] 
+              }],
+            }),
+          }
+        );
 
-    try {
-      // Try to use Hugging Face API
-      const response = await fetch(
-        "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            inputs: userMessage,
-            parameters: {
-              max_length: 100,
-              temperature: 0.7,
-            }
-          }),
+        if (!response.ok) {
+          throw new Error("Gemini API request failed");
         }
-      );
 
-      if (!response.ok) {
-        throw new Error("API request failed");
+        const data = await response.json();
+        const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (botReply) {
+          return botReply;
+        }
+      } catch (error) {
+        console.error("Gemini API Error:", error);
       }
-
-      const data = await response.json();
-      return data[0]?.generated_text || getFallbackResponse(userMessage);
-    } catch (error) {
-      console.error("AI API Error:", error);
-      toast.error("AI API unavailable, using fallback responses");
-      return getFallbackResponse(userMessage);
     }
+
+    // Fallback to predefined responses
+    return getFallbackResponse(userMessage);
   };
 
   const getFallbackResponse = (userMessage: string): string => {
@@ -231,10 +233,10 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F2FA] via-[#E0F7FA] to-[#F9D5E5]">
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <Link to="/dashboard">
-          <Button variant="ghost" className="mb-6">
+          <Button variant="ghost" className="mb-6 hover:bg-white/50 transition-all">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
@@ -245,9 +247,11 @@ export default function Chatbot() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="mb-6">
-            <h1 className="text-4xl font-bold tracking-tight mb-2">Wellness Companion 🤖</h1>
-            <p className="text-muted-foreground text-lg">
+          <div className="mb-6 text-center">
+            <h1 className="text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-[#7C83FD] to-[#C7B8EA] bg-clip-text text-transparent">
+              Wellness Companion 🌸
+            </h1>
+            <p className="text-gray-600 text-lg">
               Your friendly AI guide for mental wellness and study support
             </p>
           </div>
@@ -256,7 +260,7 @@ export default function Chatbot() {
             <Button
               variant={mode === "mindful" ? "default" : "outline"}
               onClick={() => setMode("mindful")}
-              className="flex-1"
+              className={`flex-1 transition-all ${mode === "mindful" ? "bg-gradient-to-r from-[#C7B8EA] to-[#A6E3E9] hover:shadow-lg" : ""}`}
             >
               <Leaf className="mr-2 h-4 w-4" />
               🌿 Mindful Mode
@@ -264,7 +268,7 @@ export default function Chatbot() {
             <Button
               variant={mode === "boost" ? "default" : "outline"}
               onClick={() => setMode("boost")}
-              className="flex-1"
+              className={`flex-1 transition-all ${mode === "boost" ? "bg-gradient-to-r from-[#7C83FD] to-[#A6E3E9] hover:shadow-lg" : ""}`}
             >
               <Sparkles className="mr-2 h-4 w-4" />
               ⚡ Boost Mode
@@ -272,32 +276,32 @@ export default function Chatbot() {
             <Button
               variant="outline"
               onClick={handleClearHistory}
-              className="px-4"
+              className="px-4 hover:bg-red-50 transition-all"
               title="Clear chat history"
             >
               🗑️
             </Button>
           </div>
 
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader>
-              <CardTitle>Chat with Your Wellness Companion</CardTitle>
+          <Card className="h-[600px] flex flex-col bg-white/80 backdrop-blur-lg shadow-2xl border-0">
+            <CardHeader className="border-b border-gray-100">
+              <CardTitle className="text-[#2C2F4A]">Chat with Your Wellness Companion</CardTitle>
               <CardDescription>
                 {mode === "mindful"
                   ? "Calm, mindful guidance for peace and relaxation"
                   : "Energetic motivation to help you thrive and succeed"}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <ScrollArea className="flex-1 pr-4 mb-4">
+            <CardContent className="flex-1 flex flex-col p-0">
+              <ScrollArea className="flex-1 px-6 py-4">
                 <div className="space-y-4">
                   <AnimatePresence mode="popLayout">
                     {messages.map((msg) => (
                       <motion.div
                         key={msg.id}
-                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                         transition={{ 
                           type: "spring", 
                           stiffness: 300, 
@@ -314,17 +318,17 @@ export default function Chatbot() {
                             scale: 1.02,
                             transition: { duration: 0.2 }
                           }}
-                          className={`max-w-[80%] p-4 rounded-2xl ${
+                          className={`max-w-[75%] p-4 rounded-2xl shadow-md ${
                             msg.sender === "user"
-                              ? "bg-primary text-primary-foreground shadow-lg"
-                              : "bg-card border-2 border-purple-200 dark:border-purple-800 shadow-md"
+                              ? "bg-gradient-to-r from-[#7C83FD] to-[#A6E3E9] text-white"
+                              : "bg-[#EDE7F6] text-gray-800 border border-[#C7B8EA]/30"
                           }`}
                         >
                           <motion.p 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.1, duration: 0.3 }}
-                            className="text-sm leading-relaxed"
+                            className="text-sm leading-relaxed whitespace-pre-wrap"
                           >
                             {msg.text}
                           </motion.p>
@@ -348,36 +352,44 @@ export default function Chatbot() {
                         animate={{ opacity: 1 }}
                         className="flex justify-start"
                       >
-                        <div className="bg-card border-2 border-purple-200 dark:border-purple-800 p-4 rounded-2xl">
+                        <div className="bg-[#EDE7F6] border border-[#C7B8EA]/30 p-4 rounded-2xl shadow-md">
                           <div className="flex gap-1">
-                            <span className="animate-bounce">●</span>
-                            <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>●</span>
-                            <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>●</span>
+                            <span className="animate-bounce text-[#7C83FD]">●</span>
+                            <span className="animate-bounce text-[#7C83FD]" style={{ animationDelay: "0.1s" }}>●</span>
+                            <span className="animate-bounce text-[#7C83FD]" style={{ animationDelay: "0.2s" }}>●</span>
                           </div>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  <div ref={chatEndRef} />
                 </div>
               </ScrollArea>
 
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type your message... (e.g., 'I feel anxious' or 'How can I relax?')"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  className="flex-1"
-                  disabled={isTyping}
-                />
-                <Button onClick={handleSendMessage} size="icon" disabled={isTyping}>
-                  <Send className="h-4 w-4" />
-                </Button>
+              <div className="p-4 border-t border-gray-100 bg-white/50">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Type your message... (e.g., 'I feel anxious' or 'How can I relax?')"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    className="flex-1 border-gray-300 focus:ring-2 focus:ring-[#7C83FD] rounded-full"
+                    disabled={isTyping}
+                  />
+                  <Button 
+                    onClick={handleSendMessage} 
+                    size="icon" 
+                    disabled={isTyping}
+                    className="bg-gradient-to-r from-[#7C83FD] to-[#A6E3E9] hover:shadow-lg transition-all rounded-full"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -386,15 +398,15 @@ export default function Chatbot() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800"
+            className="mt-6 p-4 bg-gradient-to-r from-[#EDE7F6] to-[#E0F7FA] rounded-lg border border-[#C7B8EA]/30"
           >
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-700">
               <strong>Try asking:</strong> "I feel anxious", "How can I relax before exams?", "I'm
               stressed about studying", "I feel lonely", or "I need sleep tips"
             </p>
-            {!import.meta.env.VITE_AI_API_KEY && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                ℹ️ Using fallback responses. Add VITE_AI_API_KEY to enable AI-powered responses.
+            {!import.meta.env.VITE_GOOGLE_API_KEY && (
+              <p className="text-xs text-amber-600 mt-2">
+                ℹ️ Using fallback responses. Add VITE_GOOGLE_API_KEY to enable AI-powered responses.
               </p>
             )}
           </motion.div>
