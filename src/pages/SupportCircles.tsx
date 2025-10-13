@@ -29,6 +29,8 @@ export default function SupportCircles() {
   const createRequest = useMutation(api.supportCircles.createCircleRequest);
 
   const [messageText, setMessageText] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [anonymousName] = useState(
     `Anonymous ${Math.floor(Math.random() * 1000)}`
   );
@@ -56,8 +58,9 @@ export default function SupportCircles() {
   }
 
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !selectedCircle) return;
+    if (!messageText.trim() || !selectedCircle || isSending) return;
 
+    setIsSending(true);
     try {
       await sendMessage({
         circleId: selectedCircle,
@@ -68,6 +71,8 @@ export default function SupportCircles() {
       toast.success("Message sent");
     } catch (error) {
       toast.error("Failed to send message");
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -77,6 +82,7 @@ export default function SupportCircles() {
       return;
     }
 
+    setIsCreating(true);
     try {
       await createRequest({
         name: circleName,
@@ -90,6 +96,8 @@ export default function SupportCircles() {
       setCircleTheme("");
     } catch (error) {
       toast.error("Failed to submit request");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -267,8 +275,12 @@ export default function SupportCircles() {
                           }
                         }}
                       />
-                      <Button onClick={handleSendMessage} size="icon">
-                        <Send className="h-4 w-4" />
+                      <Button onClick={handleSendMessage} size="icon" disabled={isSending || !messageText.trim()}>
+                        {isSending ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (
+                          <Send className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -328,10 +340,19 @@ export default function SupportCircles() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isCreating}>
               Cancel
             </Button>
-            <Button onClick={handleCreateRequest}>Submit Request</Button>
+            <Button onClick={handleCreateRequest} disabled={isCreating}>
+              {isCreating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Submitting...
+                </>
+              ) : (
+                "Submit Request"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

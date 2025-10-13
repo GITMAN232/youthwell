@@ -75,12 +75,21 @@ export default function AdminPanel() {
     );
   }
 
+  const [processingRequests, setProcessingRequests] = useState<Set<string>>(new Set());
+
   const handleApprove = async (requestId: Id<"circleRequests">) => {
+    setProcessingRequests(prev => new Set(prev).add(requestId));
     try {
       await approveRequest({ requestId });
       toast.success("Circle request approved successfully!");
     } catch (error) {
       toast.error("Failed to approve request");
+    } finally {
+      setProcessingRequests(prev => {
+        const next = new Set(prev);
+        next.delete(requestId);
+        return next;
+      });
     }
   };
 
@@ -89,12 +98,15 @@ export default function AdminPanel() {
     setRejectDialogOpen(true);
   };
 
+  const [isRejecting, setIsRejecting] = useState(false);
+
   const handleRejectConfirm = async () => {
     if (!selectedRequestId || !rejectionReason.trim()) {
       toast.error("Please provide a rejection reason");
       return;
     }
 
+    setIsRejecting(true);
     try {
       await rejectRequest({ requestId: selectedRequestId, reason: rejectionReason });
       toast.success("Circle request rejected");
@@ -103,6 +115,8 @@ export default function AdminPanel() {
       setSelectedRequestId(null);
     } catch (error) {
       toast.error("Failed to reject request");
+    } finally {
+      setIsRejecting(false);
     }
   };
 
@@ -256,14 +270,25 @@ export default function AdminPanel() {
                           <Button
                             onClick={() => handleApprove(request._id)}
                             className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-200 flex-1"
+                            disabled={processingRequests.has(request._id)}
                           >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Approve
+                            {processingRequests.has(request._id) ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Approve
+                              </>
+                            )}
                           </Button>
                           <Button
                             onClick={() => handleRejectClick(request._id)}
                             variant="destructive"
                             className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-md hover:shadow-lg transition-all duration-200 flex-1"
+                            disabled={processingRequests.has(request._id)}
                           >
                             <XCircle className="h-4 w-4 mr-2" />
                             Reject
@@ -301,11 +326,18 @@ export default function AdminPanel() {
             className="min-h-24"
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)} disabled={isRejecting}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleRejectConfirm}>
-              Confirm Rejection
+            <Button variant="destructive" onClick={handleRejectConfirm} disabled={isRejecting}>
+              {isRejecting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Rejecting...
+                </>
+              ) : (
+                "Confirm Rejection"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

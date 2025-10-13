@@ -58,9 +58,21 @@ const teamMembers = [
 ];
 
 export default function Landing() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+
+  // Show loading state while auth is initializing
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-lg text-muted-foreground">Loading YouthWell...</p>
+        </div>
+      </div>
+    );
+  }
 
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
