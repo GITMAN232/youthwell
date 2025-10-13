@@ -122,14 +122,14 @@ export default function Chatbot() {
     return <Navigate to="/auth" />;
   }
 
-  const getAIResponse = async (userMessage: string): Promise<string> => {
+  const getAIResponse = async (userMessage: string, onStream?: (chunk: string) => void): Promise<string> => {
     const geminiApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
     
     // Try Gemini API first if key is available
     if (geminiApiKey) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${geminiApiKey}&alt=sse`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -147,7 +147,56 @@ export default function Chatbot() {
           throw new Error("Gemini API request failed");
         }
 
-        const data = await response.json();
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullText = "";
+
+        if (reader && onStream) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split("\n");
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                try {
+                  const jsonData = JSON.parse(line.slice(6));
+                  const text = jsonData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                  if (text) {
+                    fullText += text;
+                    onStream(fullText);
+                  }
+                } catch (e) {
+                  // Skip invalid JSON lines
+                }
+              }
+            }
+          }
+        }
+
+        if (fullText) {
+          return fullText;
+        }
+
+        // Fallback to non-streaming if streaming fails
+        const fallbackResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ 
+                parts: [{ 
+                  text: `You are a wellness companion for college students. Respond in a ${mode === "mindful" ? "calm, mindful, and supportive" : "energetic, motivational, and encouraging"} tone. User message: ${userMessage}` 
+                }] 
+              }],
+            }),
+          }
+        );
+
+        const data = await fallbackResponse.json();
         const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (botReply) {
@@ -199,24 +248,40 @@ export default function Chatbot() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const userInput = inputText;
     setInputText("");
     setIsTyping(true);
 
+    // Create a placeholder bot message for streaming
+    const botMessageId = (Date.now() + 1).toString();
+    const botMessage: Message = {
+      id: botMessageId,
+      text: "",
+      sender: "bot",
+      timestamp: new Date(),
+    };
+    
+    setMessages((prev) => [...prev, botMessage]);
+    setIsTyping(false);
+
     try {
-      const botResponseText = await getAIResponse(inputText);
-      
-      setTimeout(() => {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: botResponseText,
-          sender: "bot",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
-        setIsTyping(false);
-      }, 800);
+      await getAIResponse(userInput, (streamedText) => {
+        // Update the bot message with streamed text
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === botMessageId ? { ...msg, text: streamedText } : msg
+          )
+        );
+      });
     } catch (error) {
-      setIsTyping(false);
+      // If streaming fails, show error message
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === botMessageId
+            ? { ...msg, text: "Sorry, I encountered an error. Please try again." }
+            : msg
+        )
+      );
       toast.error("Failed to get response");
     }
   };
