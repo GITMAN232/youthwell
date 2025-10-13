@@ -252,10 +252,10 @@ export default function AdminPanel() {
                       )}
 
                       {request.status === "pending" && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-3">
                           <Button
                             onClick={() => handleApprove(request._id)}
-                            className="bg-green-500 hover:bg-green-600"
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-200 flex-1"
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Approve
@@ -263,6 +263,7 @@ export default function AdminPanel() {
                           <Button
                             onClick={() => handleRejectClick(request._id)}
                             variant="destructive"
+                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-md hover:shadow-lg transition-all duration-200 flex-1"
                           >
                             <XCircle className="h-4 w-4 mr-2" />
                             Reject
