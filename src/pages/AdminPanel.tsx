@@ -83,7 +83,8 @@ export default function AdminPanel() {
       await approveRequest({ requestId });
       toast.success("Circle request approved successfully!");
     } catch (error) {
-      toast.error("Failed to approve request");
+      const errorMessage = error instanceof Error ? error.message : "Failed to approve request";
+      toast.error(errorMessage);
     } finally {
       setProcessingRequests(prev => {
         const next = new Set(prev);
@@ -114,7 +115,8 @@ export default function AdminPanel() {
       setRejectionReason("");
       setSelectedRequestId(null);
     } catch (error) {
-      toast.error("Failed to reject request");
+      const errorMessage = error instanceof Error ? error.message : "Failed to reject request";
+      toast.error(errorMessage);
     } finally {
       setIsRejecting(false);
     }

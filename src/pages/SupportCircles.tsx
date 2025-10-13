@@ -70,7 +70,8 @@ export default function SupportCircles() {
       setMessageText("");
       toast.success("Message sent");
     } catch (error) {
-      toast.error("Failed to send message");
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message";
+      toast.error(errorMessage);
     } finally {
       setIsSending(false);
     }
@@ -95,7 +96,8 @@ export default function SupportCircles() {
       setCircleDescription("");
       setCircleTheme("");
     } catch (error) {
-      toast.error("Failed to submit request");
+      const errorMessage = error instanceof Error ? error.message : "Failed to submit request";
+      toast.error(errorMessage);
     } finally {
       setIsCreating(false);
     }
