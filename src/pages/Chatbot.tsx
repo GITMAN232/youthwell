@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { ArrowLeft, Send, Sparkles, Leaf } from "lucide-react";
+import { toast } from "sonner";
 
 type Message = {
   id: string;
@@ -49,6 +50,7 @@ export default function Chatbot() {
   ]);
   const [inputText, setInputText] = useState("");
   const [mode, setMode] = useState<BotMode>("mindful");
+  const [isTyping, setIsTyping] = useState(false);
 
   if (isLoading) {
     return (
@@ -62,7 +64,48 @@ export default function Chatbot() {
     return <Navigate to="/auth" />;
   }
 
-  const getBotResponse = (userMessage: string): string => {
+  const getAIResponse = async (userMessage: string): Promise<string> => {
+    const apiKey = import.meta.env.VITE_AI_API_KEY;
+    
+    // If no API key, use fallback responses
+    if (!apiKey) {
+      return getFallbackResponse(userMessage);
+    }
+
+    try {
+      // Try to use Hugging Face API
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            inputs: userMessage,
+            parameters: {
+              max_length: 100,
+              temperature: 0.7,
+            }
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
+      const data = await response.json();
+      return data[0]?.generated_text || getFallbackResponse(userMessage);
+    } catch (error) {
+      console.error("AI API Error:", error);
+      toast.error("AI API unavailable, using fallback responses");
+      return getFallbackResponse(userMessage);
+    }
+  };
+
+  const getFallbackResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
     const responses = mode === "mindful" ? mindfulResponses : boostResponses;
 
@@ -88,7 +131,7 @@ export default function Chatbot() {
     return responses.default;
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
     const userMessage: Message = {
@@ -100,16 +143,25 @@ export default function Chatbot() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
+    setIsTyping(true);
 
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: getBotResponse(inputText),
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-    }, 800);
+    try {
+      const botResponseText = await getAIResponse(inputText);
+      
+      setTimeout(() => {
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: botResponseText,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        setIsTyping(false);
+      }, 800);
+    } catch (error) {
+      setIsTyping(false);
+      toast.error("Failed to get response");
+    }
   };
 
   return (
@@ -216,6 +268,21 @@ export default function Chatbot() {
                         </motion.div>
                       </motion.div>
                     ))}
+                    {isTyping && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex justify-start"
+                      >
+                        <div className="bg-card border-2 border-purple-200 dark:border-purple-800 p-4 rounded-2xl">
+                          <div className="flex gap-1">
+                            <span className="animate-bounce">●</span>
+                            <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>●</span>
+                            <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>●</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                   </AnimatePresence>
                 </div>
               </ScrollArea>
@@ -232,8 +299,9 @@ export default function Chatbot() {
                     }
                   }}
                   className="flex-1"
+                  disabled={isTyping}
                 />
-                <Button onClick={handleSendMessage} size="icon">
+                <Button onClick={handleSendMessage} size="icon" disabled={isTyping}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
@@ -250,6 +318,11 @@ export default function Chatbot() {
               <strong>Try asking:</strong> "I feel anxious", "How can I relax before exams?", "I'm
               stressed about studying", "I feel lonely", or "I need sleep tips"
             </p>
+            {!import.meta.env.VITE_AI_API_KEY && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                ℹ️ Using fallback responses. Add VITE_AI_API_KEY to enable AI-powered responses.
+              </p>
+            )}
           </motion.div>
         </motion.div>
       </div>

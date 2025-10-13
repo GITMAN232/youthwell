@@ -58,9 +58,13 @@ const teamMembers = [
 ];
 
 export default function Landing() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+
+  // Check if user is admin
+  const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || ["spachipa2@gitam.in"];
+  const isAdmin = user?.email && adminEmails.includes(user.email);
 
   // Show loading state while auth is initializing
   if (isLoading) {
@@ -92,17 +96,19 @@ export default function Landing() {
               <div className="flex items-center gap-2 text-xl font-bold">
                 <Brain className="h-6 w-6 text-purple-600" />
                 <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  MindConnect
+                  YouthWell
                 </span>
               </div>
               
               <div className="hidden md:flex items-center gap-6">
                 {[
                   { id: "home", label: "Home", type: "scroll" },
+                  { id: "about", label: "About Project", type: "scroll" },
                   { id: "community", label: "Community", type: "link", path: "/support-circles" },
-                  { id: "mood-tracking", label: "Mood Tracking", type: "link", path: "/mood-tracker" },
+                  { id: "mood-tracking", label: "Mood Tracker", type: "link", path: "/mood-tracker" },
                   { id: "chatbot", label: "Chatbot", type: "link", path: "/chatbot" },
                   { id: "team", label: "Meet the Team", type: "scroll" },
+                  ...(isAdmin ? [{ id: "admin", label: "Admin Panel", type: "link", path: "/admin-panel" }] : []),
                 ].map((item) => (
                   item.type === "link" ? (
                     <Link
@@ -147,7 +153,7 @@ export default function Landing() {
               
               <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
                 <Button variant="default" size="sm">
-                  Sign In
+                  {isAuthenticated ? "Dashboard" : "Sign In"}
                 </Button>
               </Link>
             </div>
@@ -242,6 +248,59 @@ export default function Landing() {
               </Button>
             </Link>
           </div>
+        </motion.div>
+
+        {/* About Project Section */}
+        <motion.div
+          id="about"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-16 mt-16"
+        >
+          <Card className="border-2 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+            <CardContent className="py-12 px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold tracking-tight mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  About YouthWell 💜
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                  Supporting Student Mental Health, One Click at a Time
+                </p>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div>
+                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                    <Heart className="h-6 w-6 text-pink-500" />
+                    Our Mission
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    YouthWell is a mental health platform designed specifically for college students, 
+                    aligning with SDG 3 (Good Health and Well-being). We provide a safe, anonymous, 
+                    and supportive environment to address mental health challenges, reduce stigma, 
+                    and promote overall well-being.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                    <Sparkles className="h-6 w-6 text-purple-500" />
+                    What We Offer
+                  </h3>
+                  <ul className="text-muted-foreground leading-relaxed space-y-2">
+                    <li>✨ Anonymous peer support circles</li>
+                    <li>📊 Daily mood tracking with insights</li>
+                    <li>🤖 AI wellness companion for guidance</li>
+                    <li>🧘 Mindfulness tools and resources</li>
+                    <li>📝 Private journaling space</li>
+                    <li>👨‍⚕️ Bridge to professional counseling</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Features Grid */}
