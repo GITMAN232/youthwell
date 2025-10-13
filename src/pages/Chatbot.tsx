@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Send, Sparkles, Leaf } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,19 +38,74 @@ const boostResponses: Record<string, string> = {
   default: "Let's turn that energy into action! Tell me what's on your mind - whether it's study stress, motivation, or time management. I'm here to help you thrive! ⚡"
 };
 
+const STORAGE_KEYS = {
+  MESSAGES: "mindconnect_chatbot_messages",
+  MODE: "mindconnect_chatbot_mode",
+};
+
 export default function Chatbot() {
   const { isLoading, isAuthenticated } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hi! I'm your wellness companion. I'm here to help with stress, anxiety, study tips, and mindfulness. How are you feeling today? 💜",
-      sender: "bot",
-      timestamp: new Date(),
-    },
-  ]);
+  
+  // Load messages from localStorage or use default
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.MESSAGES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Convert timestamp strings back to Date objects
+        return parsed.map((msg: Message) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to load messages from localStorage:", error);
+    }
+    // Default welcome message
+    return [
+      {
+        id: "1",
+        text: "Hi! I'm your wellness companion. I'm here to help with stress, anxiety, study tips, and mindfulness. How are you feeling today? 💜",
+        sender: "bot",
+        timestamp: new Date(),
+      },
+    ];
+  });
+  
   const [inputText, setInputText] = useState("");
-  const [mode, setMode] = useState<BotMode>("mindful");
+  
+  // Load mode from localStorage or use default
+  const [mode, setMode] = useState<BotMode>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.MODE);
+      if (saved && (saved === "mindful" || saved === "boost")) {
+        return saved as BotMode;
+      }
+    } catch (error) {
+      console.error("Failed to load mode from localStorage:", error);
+    }
+    return "mindful";
+  });
+  
   const [isTyping, setIsTyping] = useState(false);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
+    } catch (error) {
+      console.error("Failed to save messages to localStorage:", error);
+    }
+  }, [messages]);
+
+  // Save mode to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MODE, mode);
+    } catch (error) {
+      console.error("Failed to save mode to localStorage:", error);
+    }
+  }, [mode]);
 
   if (isLoading) {
     return (
@@ -164,6 +219,17 @@ export default function Chatbot() {
     }
   };
 
+  const handleClearHistory = () => {
+    const defaultMessage: Message = {
+      id: "1",
+      text: "Hi! I'm your wellness companion. I'm here to help with stress, anxiety, study tips, and mindfulness. How are you feeling today? 💜",
+      sender: "bot",
+      timestamp: new Date(),
+    };
+    setMessages([defaultMessage]);
+    toast.success("Chat history cleared");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -202,6 +268,14 @@ export default function Chatbot() {
             >
               <Sparkles className="mr-2 h-4 w-4" />
               ⚡ Boost Mode
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleClearHistory}
+              className="px-4"
+              title="Clear chat history"
+            >
+              🗑️
             </Button>
           </div>
 
