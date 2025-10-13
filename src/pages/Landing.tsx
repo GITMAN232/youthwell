@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, BookOpen, Smile, Shield, Sparkles, Brain, Moon, Sun } from "lucide-react";
+import { Heart, Users, BookOpen, Smile, TrendingUp, Brain, Moon, Sun, MessageCircle, Target, Settings } from "lucide-react";
 import { Link } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
@@ -9,50 +9,44 @@ import { useState } from "react";
 const teamMembers = [
   { 
     name: "P. Santhosh", 
-    role: "Team Lead", 
+    role: "Project Lead", 
     id: "2023003991", 
-    color: "from-purple-100 to-pink-100",
-    icon: "🚀",
+    icon: "🧠",
     description: "Leading the vision and coordinating our mission to transform student mental health support."
   },
   { 
-    name: "Golla Vinay Kumar", 
-    role: "UI/UX & Research", 
+    name: "Golla Vinaykumar", 
+    role: "UI/UX Designer", 
     id: "2023004418", 
-    color: "from-blue-100 to-purple-100",
     icon: "🎨",
     description: "Designing intuitive experiences and conducting user research to understand student needs."
   },
   { 
     name: "B. Kiran Nanda Kumar", 
-    role: "Technical Developer", 
+    role: "Backend Dev", 
     id: "2023003109", 
-    color: "from-green-100 to-blue-100",
-    icon: "💻",
+    icon: "⚙️",
     description: "Building robust and scalable technical solutions for our mental health platform."
   },
   { 
     name: "R. Ashwini", 
-    role: "Content & Outreach", 
+    role: "Research & Psychology", 
     id: "2023003535", 
-    color: "from-pink-100 to-purple-100",
-    icon: "✍️",
+    icon: "💬",
     description: "Creating meaningful content and building community connections with students."
   },
   { 
     name: "K. Sai Theja", 
-    role: "Survey & Analytics", 
+    role: "Data & Analytics", 
     id: "2023003134", 
-    color: "from-yellow-100 to-pink-100",
     icon: "📊",
     description: "Analyzing data and insights to understand mental health patterns and trends."
   },
   { 
     name: "K. Abhiram", 
-    role: "Prototype Design", 
+    role: "Integration & QA", 
     id: "2023004291", 
-    color: "from-indigo-100 to-purple-100",
-    icon: "🎯",
+    icon: "🔧",
     description: "Crafting interactive prototypes and bringing our design concepts to life."
   },
 ];
@@ -62,17 +56,15 @@ export default function Landing() {
   const [isDark, setIsDark] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
 
-  // Check if user is admin
   const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || ["spachipa2@gitam.in"];
   const isAdmin = user?.email && adminEmails.includes(user.email);
 
-  // Show loading state while auth is initializing
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9F9FB] via-[#F9D5E5] to-[#A6E3E9]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-lg text-muted-foreground">Loading YouthWell...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#C7B8EA] mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading MindConnect...</p>
         </div>
       </div>
     );
@@ -87,62 +79,59 @@ export default function Landing() {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'dark bg-[#2C2F4A]' : 'bg-gradient-to-br from-[#F9F6EE] via-purple-50 to-pink-50'}`}>
-      {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#2C2F4A]/90 border-b border-gray-200 dark:border-gray-700">
+    <div className={`min-h-screen ${isDark ? 'dark bg-gray-900' : 'bg-[#F9F9FB]'} transition-colors duration-500`}>
+      {/* Sticky Navbar with Glassmorphism */}
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2 text-xl font-bold">
-                <Brain className="h-6 w-6 text-purple-600" />
-                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  YouthWell
-                </span>
-              </div>
-              
-              <div className="hidden md:flex items-center gap-6">
-                {[
-                  { id: "home", label: "Home", type: "scroll" },
-                  { id: "about", label: "About Project", type: "scroll" },
-                  { id: "community", label: "Community", type: "link", path: "/support-circles" },
-                  { id: "mood-tracking", label: "Mood Tracker", type: "link", path: "/mood-tracker" },
-                  { id: "chatbot", label: "Chatbot", type: "link", path: "/chatbot" },
-                  { id: "team", label: "Meet the Team", type: "scroll" },
-                  ...(isAdmin ? [{ id: "admin", label: "Admin Panel", type: "link", path: "/admin-panel" }] : []),
-                ].map((item) => (
-                  item.type === "link" ? (
-                    <Link
-                      key={item.id}
-                      to={item.path!}
-                      className="text-sm font-medium transition-all relative group text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-[#98FF98]"
-                    >
-                      {item.label}
-                      <span className="absolute -bottom-1 left-0 h-0.5 bg-[#98FF98] transition-all duration-300 w-0 group-hover:w-full" />
-                    </Link>
-                  ) : (
-                    <button
-                      key={item.id}
-                      onClick={() => scrollToSection(item.id)}
-                      className={`text-sm font-medium transition-all relative group ${
-                        activeSection === item.id
-                          ? 'text-purple-600 dark:text-[#98FF98]'
-                          : 'text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-[#98FF98]'
-                      }`}
-                    >
-                      {item.label}
-                      <span className={`absolute -bottom-1 left-0 h-0.5 bg-[#98FF98] transition-all duration-300 ${
-                        activeSection === item.id ? 'w-full' : 'w-0 group-hover:w-full'
-                      }`} />
-                    </button>
-                  )
-                ))}
-              </div>
+            <div className="flex items-center gap-2">
+              <Brain className="h-7 w-7 text-[#C7B8EA]" />
+              <span className="text-xl font-bold bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] bg-clip-text text-transparent">
+                MindConnect
+              </span>
+            </div>
+            
+            <div className="hidden md:flex items-center gap-8">
+              {[
+                { id: "home", label: "Home", type: "scroll" },
+                { id: "community", label: "Community", type: "link", path: "/support-circles" },
+                { id: "mood-tracking", label: "Mood Tracking", type: "link", path: "/mood-tracker" },
+                { id: "chatbot", label: "Chatbot", type: "link", path: "/chatbot" },
+                { id: "team", label: "Meet the Team", type: "scroll" },
+                ...(isAdmin ? [{ id: "admin", label: "Admin Panel", type: "link", path: "/admin-panel" }] : []),
+              ].map((item) => (
+                item.type === "link" ? (
+                  <Link
+                    key={item.id}
+                    to={item.path!}
+                    className="text-sm font-medium transition-all relative group text-gray-700 dark:text-gray-300 hover:text-[#C7B8EA]"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] transition-all duration-300 w-0 group-hover:w-full group-hover:shadow-[0_0_8px_rgba(166,227,233,0.6)]" />
+                  </Link>
+                ) : (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className={`text-sm font-medium transition-all relative group ${
+                      activeSection === item.id
+                        ? 'text-[#C7B8EA]'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-[#C7B8EA]'
+                    }`}
+                  >
+                    {item.label}
+                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] transition-all duration-300 ${
+                      activeSection === item.id ? 'w-full shadow-[0_0_8px_rgba(166,227,233,0.6)]' : 'w-0 group-hover:w-full group-hover:shadow-[0_0_8px_rgba(166,227,233,0.6)]'
+                    }`} />
+                  </button>
+                )
+              ))}
             </div>
 
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsDark(!isDark)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
               >
                 {isDark ? (
                   <Sun className="h-5 w-5 text-yellow-400" />
@@ -152,7 +141,7 @@ export default function Landing() {
               </button>
               
               <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-                <Button variant="default" size="sm">
+                <Button variant="default" size="sm" className="bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] hover:shadow-lg transition-all duration-300">
                   {isAuthenticated ? "Dashboard" : "Sign In"}
                 </Button>
               </Link>
@@ -162,289 +151,220 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <div id="home" className="pt-24 max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16 relative"
-        >
-          {/* Floating animations */}
+      <div id="home" className="pt-32 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 5, 0],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute top-10 left-10 text-6xl opacity-20"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            💜
-          </motion.div>
-          <motion.div
-            animate={{
-              y: [0, 20, 0],
-              x: [0, 10, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute top-20 right-20 text-5xl opacity-20"
-          >
-            🫧
-          </motion.div>
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, -5, 0],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute bottom-10 left-1/4 text-4xl opacity-20"
-          >
-            💜
-          </motion.div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
+              Your Mental Health
+              <br />
+              <span className="bg-gradient-to-r from-[#A6E3E9] via-[#C7B8EA] to-[#F9D5E5] bg-clip-text text-transparent">
+                Matters 🌿
+              </span>
+            </h1>
 
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="flex justify-center mb-8"
-          >
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl">
-              <Heart className="h-12 w-12 text-white" />
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+              Connect with peers, find support, and discover tools to help you thrive. 
+              You're never alone in your journey.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <Link to="/support-circles">
+                <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] hover:shadow-[0_0_20px_rgba(166,227,233,0.5)] transition-all duration-300">
+                  🟢 Join Our Community
+                </Button>
+              </Link>
+              <Link to="/chatbot">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-[#C7B8EA] hover:bg-[#C7B8EA]/10 hover:shadow-[0_0_15px_rgba(199,184,234,0.3)] transition-all duration-300">
+                  Anonymous Chat
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-[#A6E3E9]" />
+                <span>10K+ Youth Connected 🌐</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-[#C7B8EA]" />
+                <span>24/7 Support 💬</span>
+              </div>
             </div>
           </motion.div>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Your Mental Health
-            <br />
-            Matters 💜
-          </h1>
-
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Connect with peers, track your moods, and get real help — all anonymously.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/support-circles">
-              <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
-                Join the Community
-                <Users className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20">
-                Explore Dashboard
-                <Sparkles className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* About Project Section */}
-        <motion.div
-          id="about"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="mb-16 mt-16"
-        >
-          <Card className="border-2 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-            <CardContent className="py-12 px-8">
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold tracking-tight mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  About YouthWell 💜
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                  Supporting Student Mental Health, One Click at a Time
-                </p>
-              </div>
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#F9D5E5] via-[#C7B8EA] to-[#A6E3E9] p-8 backdrop-blur-sm">
+              <div className="text-center text-8xl mb-4">🧘‍♀️</div>
+              <div className="text-center text-white text-xl font-semibold">Find Your Peace</div>
               
-              <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                <div>
-                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                    <Heart className="h-6 w-6 text-pink-500" />
-                    Our Mission
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    YouthWell is a mental health platform designed specifically for college students, 
-                    aligning with SDG 3 (Good Health and Well-being). We provide a safe, anonymous, 
-                    and supportive environment to address mental health challenges, reduce stigma, 
-                    and promote overall well-being.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                    <Sparkles className="h-6 w-6 text-purple-500" />
-                    What We Offer
-                  </h3>
-                  <ul className="text-muted-foreground leading-relaxed space-y-2">
-                    <li>✨ Anonymous peer support circles</li>
-                    <li>📊 Daily mood tracking with insights</li>
-                    <li>🤖 AI wellness companion for guidance</li>
-                    <li>🧘 Mindfulness tools and resources</li>
-                    <li>📝 Private journaling space</li>
-                    <li>👨‍⚕️ Bridge to professional counseling</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Features Grid */}
-        <motion.div
-          id="community"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
-        >
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Card className="border-2 h-full">
-              <CardHeader>
-                <Smile className="h-12 w-12 text-blue-500 mb-4" />
-                <CardTitle>Mood Tracking</CardTitle>
-                <CardDescription>
-                  Log your daily emotions, identify triggers, and build healthy streaks
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Card className="border-2 h-full">
-              <CardHeader>
-                <Users className="h-12 w-12 text-purple-500 mb-4" />
-                <CardTitle>Anonymous Support</CardTitle>
-                <CardDescription>
-                  Join peer circles to share experiences in a safe, judgment-free space
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Card className="border-2 h-full">
-              <CardHeader>
-                <Heart className="h-12 w-12 text-pink-500 mb-4" />
-                <CardTitle>Mindfulness Tools</CardTitle>
-                <CardDescription>
-                  Breathing exercises, journaling prompts, and calming resources
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Card className="border-2 h-full">
-              <CardHeader>
-                <BookOpen className="h-12 w-12 text-amber-500 mb-4" />
-                <CardTitle>Private Journal</CardTitle>
-                <CardDescription>
-                  A secure space to reflect and process your thoughts privately
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Card className="border-2 h-full">
-              <CardHeader>
-                <Shield className="h-12 w-12 text-teal-500 mb-4" />
-                <CardTitle>Professional Help</CardTitle>
-                <CardDescription>
-                  Easy bridge to licensed counselors when you need extra support
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Card className="border-2 h-full">
-              <CardHeader>
-                <Sparkles className="h-12 w-12 text-rose-500 mb-4" />
-                <CardTitle>Gratitude Wall</CardTitle>
-                <CardDescription>
-                  Share and discover positive moments from the community
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </motion.div>
-        </motion.div>
-
-        {/* Stats Section */}
-        <motion.div
-          id="mood-tracking"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl p-12 mb-16"
-        >
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Supporting Student Mental Health
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <p className="text-5xl font-bold text-blue-600 mb-2">100%</p>
-              <p className="text-muted-foreground">Anonymous & Private</p>
+              {/* Floating stat bubbles */}
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute top-8 right-8 bg-white/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg"
+              >
+                <p className="text-sm font-semibold text-gray-800">98% feel supported</p>
+              </motion.div>
+              
+              <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+                className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg"
+              >
+                <p className="text-sm font-semibold text-gray-800">24/7 always here</p>
+              </motion.div>
             </div>
-            <div>
-              <p className="text-5xl font-bold text-purple-600 mb-2">24/7</p>
-              <p className="text-muted-foreground">Always Available</p>
-            </div>
-            <div>
-              <p className="text-5xl font-bold text-pink-600 mb-2">Free</p>
-              <p className="text-muted-foreground">For All Students</p>
-            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* About / Mission Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="py-20 bg-gradient-to-br from-white/50 to-[#F9D5E5]/30 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold tracking-tight mb-4">
+              How We Support You
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Simple tools designed with your wellbeing in mind
+            </p>
           </div>
-        </motion.div>
 
-        {/* Meet the Team Section */}
-        <motion.div
-          id="team"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="mb-16"
-        >
+          <div className="grid md:grid-cols-3 gap-8">
+            <motion.div
+              whileHover={{ scale: 1.05, y: -5 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Card className="border-0 bg-gradient-to-br from-[#C7B8EA]/20 to-[#A6E3E9]/20 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#C7B8EA] to-[#A6E3E9] flex items-center justify-center text-3xl">
+                    🧭
+                  </div>
+                  <CardTitle className="text-xl">Track your mood daily</CardTitle>
+                  <CardDescription className="text-base">
+                    Understand your emotional patterns and build healthy habits
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              whileHover={{ scale: 1.05, y: -5 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Card className="border-0 bg-gradient-to-br from-[#A6E3E9]/20 to-[#F9D5E5]/20 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#A6E3E9] to-[#F9D5E5] flex items-center justify-center text-3xl">
+                    🤝
+                  </div>
+                  <CardTitle className="text-xl">Find peers who understand</CardTitle>
+                  <CardDescription className="text-base">
+                    Join supportive circles and share experiences anonymously
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              whileHover={{ scale: 1.05, y: -5 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Card className="border-0 bg-gradient-to-br from-[#F9D5E5]/20 to-[#C7B8EA]/20 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#F9D5E5] to-[#C7B8EA] flex items-center justify-center text-3xl">
+                    💡
+                  </div>
+                  <CardTitle className="text-xl">Access helpful tools</CardTitle>
+                  <CardDescription className="text-base">
+                    Mindfulness exercises, journaling, and AI wellness companion
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mood Tracker Preview */}
+      <motion.div
+        id="mood-tracking"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-4xl font-bold tracking-tight mb-6">
+              Track Your Emotional Journey
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+              Understanding your moods is the first step to better mental health. 
+              Our intuitive tracker helps you identify patterns, triggers, and celebrate progress.
+            </p>
+            <Link to="/mood-tracker">
+              <Button size="lg" className="bg-gradient-to-r from-[#C7B8EA] to-[#F9D5E5] hover:shadow-lg transition-all duration-300">
+                Start Tracking
+                <TrendingUp className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+
+          <Card className="border-0 bg-gradient-to-br from-white/80 to-[#C7B8EA]/10 backdrop-blur-md shadow-xl p-8">
+            <div className="flex justify-around mb-6">
+              {["😊", "😌", "😐", "😔", "😢"].map((emoji, i) => (
+                <motion.button
+                  key={i}
+                  whileHover={{ scale: 1.2, rotate: 5 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="text-5xl hover:drop-shadow-lg transition-all"
+                >
+                  {emoji}
+                </motion.button>
+              ))}
+            </div>
+            <div className="h-48 bg-gradient-to-br from-[#A6E3E9]/20 to-[#C7B8EA]/20 rounded-xl flex items-center justify-center">
+              <div className="text-center">
+                <Smile className="h-16 w-16 mx-auto mb-2 text-[#C7B8EA]" />
+                <p className="text-gray-600 dark:text-gray-300">Your mood chart will appear here</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </motion.div>
+
+      {/* Meet the Team Section */}
+      <motion.div
+        id="team"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="py-20 bg-gradient-to-br from-[#F9D5E5]/20 to-[#A6E3E9]/20 backdrop-blur-sm"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold tracking-tight mb-4">
               Meet Our Team 💫
             </h2>
-            <p className="text-lg text-muted-foreground">
-              The creative minds behind MindConnect.
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Passionate individuals dedicated to your wellbeing
             </p>
           </div>
 
@@ -459,31 +379,28 @@ export default function Landing() {
                 whileHover={{ 
                   y: -12, 
                   scale: 1.03,
-                  rotateY: 2,
                   transition: { type: "spring", stiffness: 300, damping: 20 }
                 }}
               >
-                <Card className={`border-2 h-full bg-gradient-to-br ${member.color} shadow-lg hover:shadow-[0_0_40px_rgba(199,184,234,0.7)] hover:border-purple-400 transition-all duration-300 overflow-hidden relative group`}>
+                <Card className="border-0 h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg hover:shadow-[0_0_30px_rgba(199,184,234,0.4)] transition-all duration-300 overflow-hidden">
                   <CardContent className="pt-8 text-center px-6">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 via-blue-400/0 to-pink-400/0 group-hover:from-purple-400/10 group-hover:via-blue-400/10 group-hover:to-pink-400/10 transition-all duration-500"></div>
                     <motion.div
                       whileHover={{ scale: 1.15, rotate: 10 }}
                       transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                      className="w-28 h-28 mx-auto mb-5 rounded-full bg-gradient-to-br from-green-200 via-blue-200 to-purple-200 flex items-center justify-center text-5xl shadow-xl relative group-hover:shadow-2xl transition-shadow duration-300"
+                      className="w-24 h-24 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#A6E3E9] via-[#C7B8EA] to-[#F9D5E5] flex items-center justify-center text-5xl shadow-xl"
                     >
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/40 to-transparent group-hover:from-white/60 transition-all duration-300"></div>
-                      <span className="relative z-10">{member.icon}</span>
+                      {member.icon}
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100 relative z-10 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
+                    <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100">
                       {member.name}
                     </h3>
-                    <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold mb-2 relative z-10 group-hover:scale-105 transition-transform duration-300">
+                    <p className="text-sm text-[#C7B8EA] font-semibold mb-2">
                       {member.role}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 relative z-10">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                       ID: {member.id}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed relative z-10 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                       {member.description}
                     </p>
                   </CardContent>
@@ -491,54 +408,41 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
-        </motion.div>
-
-        {/* CTA Section */}
-        <motion.div
-          id="chatbot"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-          className="text-center"
-        >
-          <Card className="border-2 bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-            <CardContent className="py-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                You're Not Alone
-              </h2>
-              <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-                Join a supportive community where your mental health comes first. Start your well-being journey today.
-              </p>
-              <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-                <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
-                  {isAuthenticated ? "Go to Dashboard" : "Get Started Now"}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
 
       {/* Footer */}
-      <footer className="bg-[#2C2F4A] dark:bg-gray-900 border-t-4 border-[#98FF98] py-12 mt-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-6">
-            <p className="text-white text-sm mb-4">
-              © 2025 Team MindConnect | SDG 3: Good Health & Well-Being | Built with ❤️ by Students
-            </p>
-            <div className="flex justify-center gap-6 text-sm">
-              <a href="#" className="text-[#98FF98] hover:text-[#C7B8EA] transition-colors">
-                Privacy Policy
-              </a>
-              <span className="text-gray-400">|</span>
-              <a href="#" className="text-[#98FF98] hover:text-[#C7B8EA] transition-colors">
-                Feedback
-              </a>
-              <span className="text-gray-400">|</span>
-              <a href="#" className="text-[#98FF98] hover:text-[#C7B8EA] transition-colors">
-                Contact Us
-              </a>
+      <footer className="bg-gradient-to-br from-[#C7B8EA] via-[#A6E3E9] to-[#F9D5E5] py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="font-bold text-white mb-4">About Us</h3>
+              <p className="text-white/80 text-sm leading-relaxed">
+                MindConnect is dedicated to supporting youth mental health through 
+                peer connection and accessible wellness tools.
+              </p>
             </div>
+            <div>
+              <h3 className="font-bold text-white mb-4">Resources</h3>
+              <ul className="space-y-2 text-white/80 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">Crisis Helpline</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Mental Health Tips</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Community Guidelines</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-white mb-4">Contact</h3>
+              <ul className="space-y-2 text-white/80 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Feedback</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center pt-8 border-t border-white/20">
+            <p className="text-white/90 text-sm">
+              © 2025 MindConnect | Built with ❤️ for Youth Wellbeing
+            </p>
           </div>
         </div>
       </footer>
