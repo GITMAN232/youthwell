@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Navigate, Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect, useRef } from "react";
@@ -17,6 +17,12 @@ type Message = {
 };
 
 type BotMode = "mindful" | "boost";
+
+type ChatSession = {
+  id: string;
+  messages: Message[];
+  timestamp: Date;
+};
 
 const mindfulResponses: Record<string, string> = {
   anxious: "Take a deep breath. Anxiety is temporary. Try the 4-7-8 breathing technique: breathe in for 4 counts, hold for 7, exhale for 8. You're safe right now. 🌿",
@@ -41,13 +47,13 @@ const boostResponses: Record<string, string> = {
 const STORAGE_KEYS = {
   MESSAGES: "mindconnect_chatbot_messages",
   MODE: "mindconnect_chatbot_mode",
+  HISTORY: "mindconnect_chatbot_history",
 };
 
 export default function Chatbot() {
   const { isLoading, isAuthenticated } = useAuth();
   const chatEndRef = useRef<HTMLDivElement>(null);
   
-  // Load messages from localStorage or use default
   const [messages, setMessages] = useState<Message[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.MESSAGES);
@@ -86,13 +92,31 @@ export default function Chatbot() {
   });
   
   const [isTyping, setIsTyping] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.HISTORY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.map((session: ChatSession) => ({
+          ...session,
+          timestamp: new Date(session.timestamp),
+          messages: session.messages.map((msg: Message) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to load chat history from localStorage:", error);
+    }
+    return [];
+  });
 
-  // Auto-scroll to latest message
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Save messages to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
@@ -101,7 +125,6 @@ export default function Chatbot() {
     }
   }, [messages]);
 
-  // Save mode to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.MODE, mode);
@@ -110,10 +133,25 @@ export default function Chatbot() {
     }
   }, [mode]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(chatHistory));
+    } catch (error) {
+      console.error("Failed to save chat history to localStorage:", error);
+    }
+  }, [chatHistory]);
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F2FA] to-[#E0F7FA]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7C83FD]"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading InnerYouth companion...</p>
+        </motion.div>
       </div>
     );
   }
@@ -123,13 +161,12 @@ export default function Chatbot() {
   }
 
   const getAIResponse = async (userMessage: string, onStream?: (chunk: string) => void): Promise<string> => {
-    const geminiApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+    const geminiApiKey = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyB1bnk-L5iR4X5cZR_ZNXQoEM_WZiZLC-E";
     
-    // Try Gemini API first if key is available
     if (geminiApiKey) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${geminiApiKey}&alt=sse`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${geminiApiKey}&alt=sse`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -180,9 +217,9 @@ export default function Chatbot() {
           return fullText;
         }
 
-        // Fallback to non-streaming if streaming fails
+        // Fallback to non-streaming if streaming didn't work
         const fallbackResponse = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -200,6 +237,9 @@ export default function Chatbot() {
         const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (botReply) {
+          if (onStream) {
+            onStream(botReply);
+          }
           return botReply;
         }
       } catch (error) {
@@ -207,8 +247,12 @@ export default function Chatbot() {
       }
     }
 
-    // Fallback to predefined responses
-    return getFallbackResponse(userMessage);
+    // Use fallback responses
+    const fallbackText = getFallbackResponse(userMessage);
+    if (onStream) {
+      onStream(fallbackText);
+    }
+    return fallbackText;
   };
 
   const getFallbackResponse = (userMessage: string): string => {
@@ -252,36 +296,36 @@ export default function Chatbot() {
     setInputText("");
     setIsTyping(true);
 
-    // Create a placeholder bot message for streaming
-    const botMessageId = (Date.now() + 1).toString();
-    const botMessage: Message = {
-      id: botMessageId,
-      text: "",
-      sender: "bot",
-      timestamp: new Date(),
-    };
-    
-    setMessages((prev) => [...prev, botMessage]);
-    setIsTyping(false);
-
     try {
+      const botMessageId = (Date.now() + 1).toString();
+      
       await getAIResponse(userInput, (streamedText) => {
-        // Update the bot message with streamed text
-        setMessages((prev) =>
-          prev.map((msg) =>
+        // On first chunk, add the bot message and stop typing indicator
+        setMessages((prev) => {
+          const existingMsg = prev.find(m => m.id === botMessageId);
+          if (!existingMsg) {
+            setIsTyping(false);
+            return [...prev, {
+              id: botMessageId,
+              text: streamedText,
+              sender: "bot" as const,
+              timestamp: new Date(),
+            }];
+          }
+          return prev.map((msg) =>
             msg.id === botMessageId ? { ...msg, text: streamedText } : msg
-          )
-        );
+          );
+        });
       });
     } catch (error) {
-      // If streaming fails, show error message
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === botMessageId
-            ? { ...msg, text: "Sorry, I encountered an error. Please try again." }
-            : msg
-        )
-      );
+      setIsTyping(false);
+      const errorMessageId = (Date.now() + 1).toString();
+      setMessages((prev) => [...prev, {
+        id: errorMessageId,
+        text: "Sorry, I encountered an error. Please try again.",
+        sender: "bot" as const,
+        timestamp: new Date(),
+      }]);
       toast.error("Failed to get response");
     }
   };
@@ -297,14 +341,71 @@ export default function Chatbot() {
     toast.success("Chat history cleared");
   };
 
+  const handleNewChat = () => {
+    // Save current chat to history if it has more than just the welcome message
+    if (messages.length > 1) {
+      const newSession: ChatSession = {
+        id: Date.now().toString(),
+        messages: messages,
+        timestamp: new Date(),
+      };
+      setChatHistory((prev) => [newSession, ...prev]);
+      toast.success("Chat saved to history");
+    }
+    
+    // Start fresh chat
+    const defaultMessage: Message = {
+      id: Date.now().toString(),
+      text: "Hi! I'm your wellness companion. I'm here to help with stress, anxiety, study tips, and mindfulness. How are you feeling today? 💜",
+      sender: "bot",
+      timestamp: new Date(),
+    };
+    setMessages([defaultMessage]);
+  };
+
+  const handleLoadChat = (sessionId: string) => {
+    const session = chatHistory.find((s) => s.id === sessionId);
+    if (session) {
+      setMessages(session.messages);
+      setShowHistory(false);
+      toast.success("Chat loaded");
+    }
+  };
+
+  const handleDeleteChatSession = (sessionId: string) => {
+    setChatHistory((prev) => prev.filter((s) => s.id !== sessionId));
+    toast.success("Chat deleted from history");
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F2FA] via-[#E0F7FA] to-[#F9D5E5]">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 relative overflow-hidden">
+      {/* Floating background shapes */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{ y: [0, -40, 0], x: [0, 30, 0], rotate: [0, 180, 360] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-20 left-20 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ y: [0, 50, 0], x: [0, -40, 0], rotate: [360, 180, 0] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-blue-200/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-200/20 rounded-full blur-3xl"
+        />
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8 relative z-10">
         <Link to="/dashboard">
-          <Button variant="ghost" className="mb-6 hover:bg-white/50 transition-all">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="ghost" className="mb-6 bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all shadow-lg rounded-2xl">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </motion.div>
         </Link>
 
         <motion.div
@@ -312,54 +413,148 @@ export default function Chatbot() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="mb-6 text-center">
-            <h1 className="text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-[#7C83FD] to-[#C7B8EA] bg-clip-text text-transparent">
-              Wellness Companion 🌸
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="inline-flex items-center gap-3 mb-4 px-6 py-3 bg-white/70 backdrop-blur-xl rounded-full shadow-xl"
+            >
+              <Sparkles className="h-6 w-6 text-purple-500" />
+              <span className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                ✨ Wellness Companion
+              </span>
+            </motion.div>
+            <h1 className="text-5xl font-bold tracking-tight mb-3 bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent">
+              Your AI Wellness Guide
             </h1>
             <p className="text-gray-600 text-lg">
-              Your friendly AI guide for mental wellness and study support
+              Here to support your mental wellness journey, 24/7
             </p>
           </div>
 
+          {/* Mode Selection with New Chat and History buttons */}
           <div className="flex gap-3 mb-6">
-            <Button
-              variant={mode === "mindful" ? "default" : "outline"}
-              onClick={() => setMode("mindful")}
-              className={`flex-1 transition-all ${mode === "mindful" ? "bg-gradient-to-r from-[#C7B8EA] to-[#A6E3E9] hover:shadow-lg" : ""}`}
-            >
-              <Leaf className="mr-2 h-4 w-4" />
-              🌿 Mindful Mode
-            </Button>
-            <Button
-              variant={mode === "boost" ? "default" : "outline"}
-              onClick={() => setMode("boost")}
-              className={`flex-1 transition-all ${mode === "boost" ? "bg-gradient-to-r from-[#7C83FD] to-[#A6E3E9] hover:shadow-lg" : ""}`}
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              ⚡ Boost Mode
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleClearHistory}
-              className="px-4 hover:bg-red-50 transition-all"
-              title="Clear chat history"
-            >
-              🗑️
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
+              <Button
+                variant={mode === "mindful" ? "default" : "outline"}
+                onClick={() => setMode("mindful")}
+                className={`w-full h-14 rounded-2xl transition-all ${
+                  mode === "mindful"
+                    ? "bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white shadow-xl"
+                    : "bg-white/70 backdrop-blur-sm hover:bg-white/90 border-purple-200"
+                }`}
+              >
+                <Leaf className="mr-2 h-5 w-5" />
+                <span className="text-base font-semibold">🌿 Mindful Mode</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
+              <Button
+                variant={mode === "boost" ? "default" : "outline"}
+                onClick={() => setMode("boost")}
+                className={`w-full h-14 rounded-2xl transition-all ${
+                  mode === "boost"
+                    ? "bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-xl"
+                    : "bg-white/70 backdrop-blur-sm hover:bg-white/90 border-blue-200"
+                }`}
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                <span className="text-base font-semibold">⚡ Boost Mode</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                onClick={handleNewChat}
+                className="h-14 px-6 bg-white/70 backdrop-blur-sm hover:bg-green-50 border-green-200 rounded-2xl"
+                title="Start new chat"
+              >
+                <span className="text-xl">🔄</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                onClick={() => setShowHistory(!showHistory)}
+                className="h-14 px-6 bg-white/70 backdrop-blur-sm hover:bg-blue-50 border-blue-200 rounded-2xl"
+                title="Chat history"
+              >
+                <span className="text-xl">🕓</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                onClick={handleClearHistory}
+                className="h-14 px-6 bg-white/70 backdrop-blur-sm hover:bg-red-50 border-red-200 rounded-2xl"
+                title="Clear chat history"
+              >
+                <span className="text-xl">🗑️</span>
+              </Button>
+            </motion.div>
           </div>
 
-          <Card className="h-[600px] flex flex-col bg-white/80 backdrop-blur-lg shadow-2xl border-0">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-[#2C2F4A]">Chat with Your Wellness Companion</CardTitle>
-              <CardDescription>
-                {mode === "mindful"
-                  ? "Calm, mindful guidance for peace and relaxation"
-                  : "Energetic motivation to help you thrive and succeed"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-0">
-              <ScrollArea className="flex-1 px-6 py-4">
-                <div className="space-y-4">
+          {/* Chat History Panel */}
+          {showHistory && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mb-6 p-6 bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold text-purple-600">🕓 Chat History</h3>
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowHistory(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </Button>
+              </div>
+              {chatHistory.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No saved chats yet. Start a conversation and click "New Chat" to save it!</p>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {chatHistory.map((session) => (
+                    <motion.div
+                      key={session.id}
+                      whileHover={{ scale: 1.02 }}
+                      className="p-4 bg-purple-50 hover:bg-purple-100 rounded-2xl cursor-pointer transition-all border border-purple-200 flex items-center justify-between"
+                    >
+                      <div onClick={() => handleLoadChat(session.id)} className="flex-1">
+                        <p className="font-semibold text-gray-800">
+                          Chat from {session.timestamp.toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {session.messages.length} messages • {session.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteChatSession(session.id);
+                        }}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        🗑️
+                      </Button>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Chat Card */}
+          <Card className="h-[600px] flex flex-col bg-white/60 backdrop-blur-2xl shadow-2xl border-0 rounded-3xl overflow-hidden">
+            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+              <ScrollArea className="flex-1 px-6 py-6 max-h-[450px]">
+                <div className="space-y-4 pr-4">
                   <AnimatePresence mode="popLayout">
                     {messages.map((msg) => (
                       <motion.div
@@ -383,17 +578,17 @@ export default function Chatbot() {
                             scale: 1.02,
                             transition: { duration: 0.2 }
                           }}
-                          className={`max-w-[75%] p-4 rounded-2xl shadow-md ${
+                          className={`max-w-[80%] p-5 rounded-3xl shadow-lg ${
                             msg.sender === "user"
-                              ? "bg-gradient-to-r from-[#7C83FD] to-[#A6E3E9] text-white"
-                              : "bg-[#EDE7F6] text-gray-800 border border-[#C7B8EA]/30"
+                              ? "bg-gradient-to-br from-purple-400 to-purple-500 text-white"
+                              : "bg-white/90 backdrop-blur-sm text-gray-800 border border-purple-100"
                           }`}
                         >
                           <motion.p 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.1, duration: 0.3 }}
-                            className="text-sm leading-relaxed whitespace-pre-wrap"
+                            className="text-base leading-relaxed whitespace-pre-wrap"
                           >
                             {msg.text}
                           </motion.p>
@@ -417,11 +612,23 @@ export default function Chatbot() {
                         animate={{ opacity: 1 }}
                         className="flex justify-start"
                       >
-                        <div className="bg-[#EDE7F6] border border-[#C7B8EA]/30 p-4 rounded-2xl shadow-md">
-                          <div className="flex gap-1">
-                            <span className="animate-bounce text-[#7C83FD]">●</span>
-                            <span className="animate-bounce text-[#7C83FD]" style={{ animationDelay: "0.1s" }}>●</span>
-                            <span className="animate-bounce text-[#7C83FD]" style={{ animationDelay: "0.2s" }}>●</span>
+                        <div className="bg-white/90 backdrop-blur-sm border border-purple-100 p-5 rounded-3xl shadow-lg">
+                          <div className="flex gap-2">
+                            <motion.span
+                              animate={{ scale: [1, 1.3, 1] }}
+                              transition={{ duration: 0.6, repeat: Infinity }}
+                              className="w-2 h-2 bg-purple-400 rounded-full"
+                            />
+                            <motion.span
+                              animate={{ scale: [1, 1.3, 1] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                              className="w-2 h-2 bg-purple-400 rounded-full"
+                            />
+                            <motion.span
+                              animate={{ scale: [1, 1.3, 1] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                              className="w-2 h-2 bg-purple-400 rounded-full"
+                            />
                           </div>
                         </div>
                       </motion.div>
@@ -431,10 +638,11 @@ export default function Chatbot() {
                 </div>
               </ScrollArea>
 
-              <div className="p-4 border-t border-gray-100 bg-white/50">
-                <div className="flex gap-2">
+              {/* Input Area */}
+              <div className="p-6 bg-white/50 backdrop-blur-sm border-t border-purple-100">
+                <div className="flex gap-3">
                   <Input
-                    placeholder="Type your message... (e.g., 'I feel anxious' or 'How can I relax?')"
+                    placeholder="Share what's on your mind..."
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => {
@@ -443,31 +651,33 @@ export default function Chatbot() {
                         handleSendMessage();
                       }
                     }}
-                    className="flex-1 border-gray-300 focus:ring-2 focus:ring-[#7C83FD] rounded-full"
+                    className="flex-1 h-14 border-purple-200 focus:ring-2 focus:ring-purple-400 rounded-2xl bg-white/80 backdrop-blur-sm text-base px-6"
                     disabled={isTyping}
                   />
-                  <Button 
-                    onClick={handleSendMessage} 
-                    size="icon" 
-                    disabled={isTyping}
-                    className="bg-gradient-to-r from-[#7C83FD] to-[#A6E3E9] hover:shadow-lg transition-all rounded-full"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button 
+                      onClick={handleSendMessage} 
+                      size="icon" 
+                      disabled={isTyping}
+                      className="h-14 w-14 bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all rounded-2xl"
+                    >
+                      <Send className="h-5 w-5" />
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Info Banner */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="mt-6 p-4 bg-gradient-to-r from-[#EDE7F6] to-[#E0F7FA] rounded-lg border border-[#C7B8EA]/30"
+            className="mt-6 p-5 bg-white/60 backdrop-blur-xl rounded-2xl border border-purple-100 shadow-lg"
           >
-            <p className="text-sm text-gray-700">
-              <strong>Try asking:</strong> "I feel anxious", "How can I relax before exams?", "I'm
-              stressed about studying", "I feel lonely", or "I need sleep tips"
+            <p className="text-sm text-gray-700 leading-relaxed">
+              <strong className="text-purple-600">💡 Try asking:</strong> "I feel anxious", "How can I relax before exams?", "I'm stressed about studying", "I feel lonely", or "I need sleep tips"
             </p>
             {!import.meta.env.VITE_GOOGLE_API_KEY && (
               <p className="text-xs text-amber-600 mt-2">

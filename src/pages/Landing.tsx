@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, BookOpen, Smile, TrendingUp, Brain, Moon, Sun, MessageCircle, Target, Settings } from "lucide-react";
+import { Heart, Users, BookOpen, Smile, TrendingUp, Flower2, Moon, Sun, MessageCircle, Target, Sparkles, Shield } from "lucide-react";
 import { Link } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
@@ -53,399 +53,441 @@ const teamMembers = [
 
 export default function Landing() {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const [isDark, setIsDark] = useState(false);
-  const [activeSection, setActiveSection] = useState("home");
 
   const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || ["spachipa2@gitam.in"];
   const isAdmin = user?.email && adminEmails.includes(user.email);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9F9FB] via-[#F9D5E5] to-[#A6E3E9]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#C7B8EA] mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading MindConnect...</p>
-        </div>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="loading"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.3 }}
+          className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
+          >
+            <div className="animate-spin rounded-full h-20 w-20 border-b-4 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-xl font-semibold text-gray-700">Loading YouthWell...</p>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
-  const scrollToSection = (sectionId: string) => {
-    setActiveSection(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
-    <div className={`min-h-screen ${isDark ? 'dark bg-gray-900' : 'bg-[#F9F9FB]'} transition-colors duration-500`}>
-      {/* Sticky Navbar with Glassmorphism */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200/50 dark:border-gray-700/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Brain className="h-7 w-7 text-[#C7B8EA]" />
-              <span className="text-xl font-bold bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] bg-clip-text text-transparent">
-                MindConnect
-              </span>
-            </div>
-            
-            <div className="hidden md:flex items-center gap-8">
-              {[
-                { id: "home", label: "Home", type: "scroll" },
-                { id: "community", label: "Community", type: "link", path: "/support-circles" },
-                { id: "mood-tracking", label: "Mood Tracking", type: "link", path: "/mood-tracker" },
-                { id: "chatbot", label: "Chatbot", type: "link", path: "/chatbot" },
-                { id: "team", label: "Meet the Team", type: "scroll" },
-                ...(isAdmin ? [{ id: "admin", label: "Admin Panel", type: "link", path: "/admin-panel" }] : []),
-              ].map((item) => (
-                item.type === "link" ? (
-                  <Link
-                    key={item.id}
-                    to={item.path!}
-                    className="text-sm font-medium transition-all relative group text-gray-700 dark:text-gray-300 hover:text-[#C7B8EA]"
-                  >
-                    {item.label}
-                    <span className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] transition-all duration-300 w-0 group-hover:w-full group-hover:shadow-[0_0_8px_rgba(166,227,233,0.6)]" />
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="main-content"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4 }}
+        className="min-h-screen bg-gradient-to-br from-[#F0F4FF] via-[#FAF5FF] to-[#F7F8FC]"
+      >
+        {/* Modern Floating Navbar */}
+        <motion.nav 
+          initial={{ y: -100 }}
+          animate={{ y: 0 }}
+          transition={{ type: "spring", stiffness: 100 }}
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl"
+        >
+          <div className="backdrop-blur-xl bg-white/90 rounded-2xl shadow-lg border border-white/40 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center gap-3 cursor-pointer"
+              >
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                  <Flower2 className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent">
+                  InnerYouth
+                </span>
+              </motion.div>
+              
+              <div className="hidden md:flex items-center gap-6">
+                <Link to="/support-circles">
+                  <Button variant="ghost" className="hover:bg-purple-100">
+                    <Users className="h-4 w-4 mr-2" />
+                    Community
+                  </Button>
+                </Link>
+                <Link to="/mood-tracker">
+                  <Button variant="ghost" className="hover:bg-blue-100">
+                    <Smile className="h-4 w-4 mr-2" />
+                    Mood Tracker
+                  </Button>
+                </Link>
+                <Link to="/chatbot">
+                  <Button variant="ghost" className="hover:bg-pink-100">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    AI Companion
+                  </Button>
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin-panel">
+                    <Button variant="ghost" className="hover:bg-purple-100">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin
+                    </Button>
                   </Link>
-                ) : (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className={`text-sm font-medium transition-all relative group ${
-                      activeSection === item.id
-                        ? 'text-[#C7B8EA]'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-[#C7B8EA]'
-                    }`}
-                  >
-                    {item.label}
-                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] transition-all duration-300 ${
-                      activeSection === item.id ? 'w-full shadow-[0_0_8px_rgba(166,227,233,0.6)]' : 'w-0 group-hover:w-full group-hover:shadow-[0_0_8px_rgba(166,227,233,0.6)]'
-                    }`} />
-                  </button>
-                )
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsDark(!isDark)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5 text-yellow-400" />
-                ) : (
-                  <Moon className="h-5 w-5 text-gray-700" />
                 )}
-              </button>
-              
-              <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-                <Button variant="default" size="sm" className="bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] hover:shadow-lg transition-all duration-300">
-                  {isAuthenticated ? "Dashboard" : "Sign In"}
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <div id="home" className="pt-32 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
-              Your Mental Health
-              <br />
-              <span className="bg-gradient-to-r from-[#A6E3E9] via-[#C7B8EA] to-[#F9D5E5] bg-clip-text text-transparent">
-                Matters 🌿
-              </span>
-            </h1>
-
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              Connect with peers, find support, and discover tools to help you thrive. 
-              You're never alone in your journey.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <Link to="/support-circles">
-                <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-[#A6E3E9] to-[#C7B8EA] hover:shadow-[0_0_20px_rgba(166,227,233,0.5)] transition-all duration-300">
-                  🟢 Join Our Community
-                </Button>
-              </Link>
-              <Link to="/chatbot">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-[#C7B8EA] hover:bg-[#C7B8EA]/10 hover:shadow-[0_0_15px_rgba(199,184,234,0.3)] transition-all duration-300">
-                  Anonymous Chat
-                </Button>
-              </Link>
-            </div>
-
-            <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-[#A6E3E9]" />
-                <span>10K+ Youth Connected 🌐</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-[#C7B8EA]" />
-                <span>24/7 Support 💬</span>
+
+              <div className="flex items-center gap-3">
+                <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
+                  <Button className="bg-gradient-to-r from-[#FF77E9] to-[#8B5CF6] hover:from-[#FF66E0] hover:to-[#7C4FE5] text-white shadow-md hover:shadow-lg transition-all rounded-xl px-6">
+                    {isAuthenticated ? "Dashboard" : "Get Started"}
+                  </Button>
+                </Link>
               </div>
             </div>
-          </motion.div>
+          </div>
+        </motion.nav>
 
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
-          >
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#F9D5E5] via-[#C7B8EA] to-[#A6E3E9] p-8 backdrop-blur-sm">
-              <div className="text-center text-8xl mb-4">🧘‍♀️</div>
-              <div className="text-center text-white text-xl font-semibold">Find Your Peace</div>
-              
-              {/* Floating stat bubbles */}
+        {/* Hero Section - Redesigned */}
+        <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="absolute top-8 right-8 bg-white/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
               >
-                <p className="text-sm font-semibold text-gray-800">98% feel supported</p>
-              </motion.div>
-              
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg"
-              >
-                <p className="text-sm font-semibold text-gray-800">24/7 always here</p>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
+                <h1 className="text-6xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+                  Your Mental Health
+                  <br />
+                  <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent">
+                    Journey Starts Here
+                  </span>
+                </h1>
 
-      {/* About / Mission Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="py-20 bg-gradient-to-br from-white/50 to-[#F9D5E5]/30 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold tracking-tight mb-4">
-              How We Support You
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Simple tools designed with your wellbeing in mind
-            </p>
-          </div>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  A safe space for college students to connect, heal, and thrive. 
+                  Join thousands finding support, tracking wellness, and building resilience.
+                </p>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <Card className="border-0 bg-gradient-to-br from-[#C7B8EA]/20 to-[#A6E3E9]/20 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#C7B8EA] to-[#A6E3E9] flex items-center justify-center text-3xl">
-                    🧭
-                  </div>
-                  <CardTitle className="text-xl">Track your mood daily</CardTitle>
-                  <CardDescription className="text-base">
-                    Understand your emotional patterns and build healthy habits
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <Card className="border-0 bg-gradient-to-br from-[#A6E3E9]/20 to-[#F9D5E5]/20 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#A6E3E9] to-[#F9D5E5] flex items-center justify-center text-3xl">
-                    🤝
-                  </div>
-                  <CardTitle className="text-xl">Find peers who understand</CardTitle>
-                  <CardDescription className="text-base">
-                    Join supportive circles and share experiences anonymously
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.05, y: -5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <Card className="border-0 bg-gradient-to-br from-[#F9D5E5]/20 to-[#C7B8EA]/20 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#F9D5E5] to-[#C7B8EA] flex items-center justify-center text-3xl">
-                    💡
-                  </div>
-                  <CardTitle className="text-xl">Access helpful tools</CardTitle>
-                  <CardDescription className="text-base">
-                    Mindfulness exercises, journaling, and AI wellness companion
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Mood Tracker Preview */}
-      <motion.div
-        id="mood-tracking"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      >
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-4xl font-bold tracking-tight mb-6">
-              Track Your Emotional Journey
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              Understanding your moods is the first step to better mental health. 
-              Our intuitive tracker helps you identify patterns, triggers, and celebrate progress.
-            </p>
-            <Link to="/mood-tracker">
-              <Button size="lg" className="bg-gradient-to-r from-[#C7B8EA] to-[#F9D5E5] hover:shadow-lg transition-all duration-300">
-                Start Tracking
-                <TrendingUp className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-
-          <Card className="border-0 bg-gradient-to-br from-white/80 to-[#C7B8EA]/10 backdrop-blur-md shadow-xl p-8">
-            <div className="flex justify-around mb-6">
-              {["😊", "😌", "😐", "😔", "😢"].map((emoji, i) => (
-                <motion.button
-                  key={i}
-                  whileHover={{ scale: 1.2, rotate: 5 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="text-5xl hover:drop-shadow-lg transition-all"
-                >
-                  {emoji}
-                </motion.button>
-              ))}
-            </div>
-            <div className="h-48 bg-gradient-to-br from-[#A6E3E9]/20 to-[#C7B8EA]/20 rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <Smile className="h-16 w-16 mx-auto mb-2 text-[#C7B8EA]" />
-                <p className="text-gray-600 dark:text-gray-300">Your mood chart will appear here</p>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </motion.div>
-
-      {/* Meet the Team Section */}
-      <motion.div
-        id="team"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="py-20 bg-gradient-to-br from-[#F9D5E5]/20 to-[#A6E3E9]/20 backdrop-blur-sm"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold tracking-tight mb-4">
-              Meet Our Team 💫
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Passionate individuals dedicated to your wellbeing
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teamMembers.map((member, index) => (
-              <motion.div
-                key={member.id}
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                whileHover={{ 
-                  y: -12, 
-                  scale: 1.03,
-                  transition: { type: "spring", stiffness: 300, damping: 20 }
-                }}
-              >
-                <Card className="border-0 h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg hover:shadow-[0_0_30px_rgba(199,184,234,0.4)] transition-all duration-300 overflow-hidden">
-                  <CardContent className="pt-8 text-center px-6">
-                    <motion.div
-                      whileHover={{ scale: 1.15, rotate: 10 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                      className="w-24 h-24 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#A6E3E9] via-[#C7B8EA] to-[#F9D5E5] flex items-center justify-center text-5xl shadow-xl"
-                    >
-                      {member.icon}
+                <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                  <Link to="/support-circles">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-[#FF77E9] to-[#8B5CF6] hover:from-[#FF66E0] hover:to-[#7C4FE5] shadow-md hover:shadow-lg transition-all rounded-xl text-white">
+                        <Sparkles className="mr-2 h-5 w-5" />
+                        Join Community
+                      </Button>
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100">
-                      {member.name}
-                    </h3>
-                    <p className="text-sm text-[#C7B8EA] font-semibold mb-2">
-                      {member.role}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                      ID: {member.id}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                      {member.description}
-                    </p>
-                  </CardContent>
-                </Card>
+                  </Link>
+                  <Link to="/chatbot">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-purple-200 bg-white/80 hover:bg-white hover:border-purple-300 rounded-xl shadow-sm">
+                        <MessageCircle className="mr-2 h-5 w-5" />
+                        Try AI Companion
+                      </Button>
+                    </motion.div>
+                  </Link>
+                </div>
+
+                <div className="flex flex-wrap gap-8">
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="p-3 bg-white/80 rounded-xl shadow-sm">
+                      <Users className="h-6 w-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">10K+</p>
+                      <p className="text-sm text-gray-600">Active Students</p>
+                    </div>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="p-3 bg-white/80 rounded-xl shadow-sm">
+                      <Heart className="h-6 w-6 text-pink-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">98%</p>
+                      <p className="text-sm text-gray-600">Feel Supported</p>
+                    </div>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="p-3 bg-white/80 rounded-xl shadow-sm">
+                      <MessageCircle className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">24/7</p>
+                      <p className="text-sm text-gray-600">Always Available</p>
+                    </div>
+                  </motion.div>
+                </div>
               </motion.div>
-            ))}
+
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative"
+              >
+                <div className="relative">
+                  <motion.div
+                    animate={{ 
+                      y: [0, -20, 0],
+                      rotate: [0, 5, 0]
+                    }}
+                    transition={{ 
+                      duration: 6, 
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="relative z-10"
+                  >
+                    <div className="bg-gradient-to-br from-[#FF77E9] via-[#8B5CF6] to-[#6366F1] rounded-3xl p-1 shadow-lg">
+                      <div className="bg-white/95 rounded-3xl p-12 text-center backdrop-blur-sm">
+                        <div className="text-9xl mb-6">🧘‍♀️</div>
+                        <h3 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                          Find Your Peace
+                        </h3>
+                        <p className="text-gray-600">
+                          Start your wellness journey today
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Floating Elements */}
+                  <motion.div
+                    animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="absolute -top-8 -right-8 bg-white rounded-2xl p-4 shadow-xl"
+                  >
+                    <p className="text-sm font-semibold text-purple-600">✨ AI-Powered Support</p>
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+                    className="absolute -bottom-8 -left-8 bg-white rounded-2xl p-4 shadow-xl"
+                  >
+                    <p className="text-sm font-semibold text-pink-600">💜 Anonymous & Safe</p>
+                  </motion.div>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
-      </motion.div>
 
-      {/* Footer */}
-      <footer className="bg-gradient-to-br from-[#C7B8EA] via-[#A6E3E9] to-[#F9D5E5] py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-white mb-4">About Us</h3>
-              <p className="text-white/80 text-sm leading-relaxed">
-                MindConnect is dedicated to supporting youth mental health through 
-                peer connection and accessible wellness tools.
+        {/* Features Section - Redesigned */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="py-20 px-4 sm:px-6 lg:px-8"
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-5xl font-bold tracking-tight mb-4"
+              >
+                Everything You Need to <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Thrive</span>
+              </motion.h2>
+              <p className="text-xl text-gray-600">
+                Comprehensive tools designed for your mental wellness journey
               </p>
             </div>
-            <div>
-              <h3 className="font-bold text-white mb-4">Resources</h3>
-              <ul className="space-y-2 text-white/80 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Crisis Helpline</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Mental Health Tips</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Community Guidelines</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-white mb-4">Contact</h3>
-              <ul className="space-y-2 text-white/80 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Feedback</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              </ul>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: <Smile className="h-8 w-8" />,
+                  title: "Mood Tracking",
+                  description: "Track your emotions, identify patterns, and celebrate progress with daily check-ins",
+                  gradient: "from-purple-500 to-purple-600",
+                  bgGradient: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20"
+                },
+                {
+                  icon: <Users className="h-8 w-8" />,
+                  title: "Support Circles",
+                  description: "Join anonymous peer groups, share experiences, and find understanding in a safe space",
+                  gradient: "from-pink-500 to-pink-600",
+                  bgGradient: "from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20"
+                },
+                {
+                  icon: <MessageCircle className="h-8 w-8" />,
+                  title: "AI Wellness Companion",
+                  description: "24/7 support with personalized guidance, mindfulness tips, and study strategies",
+                  gradient: "from-blue-500 to-blue-600",
+                  bgGradient: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20"
+                },
+                {
+                  icon: <Heart className="h-8 w-8" />,
+                  title: "Calm Hub",
+                  description: "Breathing exercises, meditation guides, and relaxation techniques for peace of mind",
+                  gradient: "from-green-500 to-green-600",
+                  bgGradient: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20"
+                },
+                {
+                  icon: <BookOpen className="h-8 w-8" />,
+                  title: "Private Journal",
+                  description: "Express yourself freely in a secure, private space with guided prompts and reflections",
+                  gradient: "from-amber-500 to-amber-600",
+                  bgGradient: "from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20"
+                },
+                {
+                  icon: <Target className="h-8 w-8" />,
+                  title: "Professional Counseling",
+                  description: "Connect with licensed counselors for confidential support when you need it most",
+                  gradient: "from-teal-500 to-teal-600",
+                  bgGradient: "from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20"
+                }
+              ].map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                >
+                  <Card className={`border-0 bg-white/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 h-full`}>
+                    <CardHeader>
+                      <div className={`w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white shadow-lg`}>
+                        {feature.icon}
+                      </div>
+                      <CardTitle className="text-2xl mb-2">{feature.title}</CardTitle>
+                      <CardDescription className="text-base leading-relaxed">
+                        {feature.description}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           </div>
-          <div className="text-center pt-8 border-t border-white/20">
-            <p className="text-white/90 text-sm">
-              © 2025 MindConnect | Built with ❤️ for Youth Wellbeing
-            </p>
+        </motion.div>
+
+        {/* Team Section - Redesigned */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50 backdrop-blur-sm"
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-5xl font-bold tracking-tight mb-4">
+                Meet the <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Dream Team</span>
+              </h2>
+              <p className="text-xl text-gray-600">
+                Passionate individuals dedicated to transforming student mental health
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {teamMembers.map((member, index) => (
+                <motion.div
+                  key={member.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.03 }}
+                >
+                  <Card className="border-0 bg-white/90 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
+                    <CardContent className="pt-8 text-center">
+                      <motion.div
+                        whileHover={{ scale: 1.2, rotate: 360 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                        className="w-24 h-24 mx-auto mb-5 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center text-5xl shadow-xl"
+                      >
+                        {member.icon}
+                      </motion.div>
+                      <h3 className="text-xl font-bold mb-2">{member.name}</h3>
+                      <p className="text-sm font-semibold text-purple-600 mb-2">
+                        {member.role}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-4">
+                        ID: {member.id}
+                      </p>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {member.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        </motion.div>
+
+        {/* Footer - Redesigned with Glassmorphism */}
+        <footer className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 opacity-60"></div>
+          
+          {/* Glassmorphism Overlay */}
+          <div className="absolute inset-0 backdrop-blur-xl bg-white/40"></div>
+          
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="grid md:grid-cols-4 gap-12 mb-12">
+              <div className="md:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                    <Flower2 className="h-8 w-8 text-white" />
+                  </div>
+                  <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent">InnerYouth</span>
+                </div>
+                <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                  Empowering college students with mental health support, peer connections, 
+                  and wellness tools. Together, we're building a healthier, happier generation.
+                </p>
+                <p className="text-purple-600 text-sm font-semibold">
+                  🌍 Aligned with UN SDG 3: Good Health and Well-being
+                </p>
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-800 text-lg mb-4">Quick Links</h3>
+                <ul className="space-y-3 text-gray-600">
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Crisis Helpline</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Mental Health Resources</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Community Guidelines</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-800 text-lg mb-4">Get Help</h3>
+                <ul className="space-y-3 text-gray-600">
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Support Center</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Contact Us</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">FAQs</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Feedback</a></li>
+                </ul>
+              </div>
+            </div>
+            <div className="pt-8 border-t border-purple-200/50 text-center">
+              <p className="text-gray-700 text-lg">
+                © 2025 InnerYouth | Built with ❤️ for Student Mental Health
+              </p>
+            </div>
+          </div>
+        </footer>
+      </motion.div>
+    </AnimatePresence>
   );
 }
