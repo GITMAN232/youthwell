@@ -1,2 +1,1 @@
-   npx convex dev
-   
+cat .env.local
