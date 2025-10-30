@@ -128,49 +128,25 @@ export default function Landing() {
                 </span>
               </motion.div>
               
-              <div className="hidden lg:flex items-center gap-6">
-                <Button 
-                  variant="ghost" 
-                  className="hover:bg-purple-100"
-                  onClick={() => scrollToSection("features")}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Features
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="hover:bg-blue-100"
-                  onClick={() => scrollToSection("team")}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Team
-                </Button>
+              <div className="hidden lg:flex items-center gap-8 flex-1 justify-center">
                 <Link to="/support-circles">
-                  <Button variant="ghost" className="hover:bg-purple-100">
-                    <Users className="h-4 w-4 mr-2" />
+                  <Button variant="ghost" className="hover:bg-transparent text-gray-700 hover:text-purple-600 font-medium">
+                    <Users className="h-5 w-5 mr-2" />
                     Community
                   </Button>
                 </Link>
                 <Link to="/mood-tracker">
-                  <Button variant="ghost" className="hover:bg-blue-100">
-                    <Smile className="h-4 w-4 mr-2" />
+                  <Button variant="ghost" className="hover:bg-transparent text-gray-700 hover:text-purple-600 font-medium">
+                    <Smile className="h-5 w-5 mr-2" />
                     Mood Tracker
                   </Button>
                 </Link>
                 <Link to="/chatbot">
-                  <Button variant="ghost" className="hover:bg-pink-100">
-                    <MessageCircle className="h-4 w-4 mr-2" />
+                  <Button variant="ghost" className="hover:bg-transparent text-gray-700 hover:text-purple-600 font-medium">
+                    <MessageCircle className="h-5 w-5 mr-2" />
                     AI Companion
                   </Button>
                 </Link>
-                {isAdmin && (
-                  <Link to="/admin-panel">
-                    <Button variant="ghost" className="hover:bg-purple-100">
-                      <Shield className="h-4 w-4 mr-2" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
               </div>
 
               <div className="flex items-center gap-2 sm:gap-3">
