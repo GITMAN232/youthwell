@@ -57,6 +57,20 @@ export default function Landing() {
   const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || ["spachipa2@gitam.in"];
   const isAdmin = user?.email && adminEmails.includes(user.email);
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const navbarHeight = 80; // Approximate navbar height
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <AnimatePresence mode="wait">
@@ -104,6 +118,7 @@ export default function Landing() {
               <motion.div 
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-2 sm:gap-3 cursor-pointer"
+                onClick={() => scrollToSection("hero")}
               >
                 <div className="p-1.5 sm:p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
                   <Flower2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
@@ -114,6 +129,22 @@ export default function Landing() {
               </motion.div>
               
               <div className="hidden lg:flex items-center gap-6">
+                <Button 
+                  variant="ghost" 
+                  className="hover:bg-purple-100"
+                  onClick={() => scrollToSection("features")}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Features
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="hover:bg-blue-100"
+                  onClick={() => scrollToSection("team")}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Team
+                </Button>
                 <Link to="/support-circles">
                   <Button variant="ghost" className="hover:bg-purple-100">
                     <Users className="h-4 w-4 mr-2" />
@@ -156,7 +187,7 @@ export default function Landing() {
         </motion.nav>
 
         {/* Hero Section - Mobile-First */}
-        <div className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
+        <div id="hero" className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-center">
               <motion.div
@@ -292,6 +323,7 @@ export default function Landing() {
 
         {/* Features Section - Mobile-First */}
         <motion.div
+          id="features"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -385,6 +417,7 @@ export default function Landing() {
 
         {/* Team Section - Mobile-First */}
         <motion.div
+          id="team"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
