@@ -297,6 +297,219 @@ export default function Landing() {
           </div>
         </div>
 
+        {/* Research & Empathy Journey Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-teal-50/50 via-purple-50/30 to-blue-50/50"
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12 sm:mb-16">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-4"
+              >
+                Our <span className="bg-gradient-to-r from-teal-600 to-purple-600 bg-clip-text text-transparent">Research & Empathy</span> Journey
+              </motion.h2>
+              <p className="text-base sm:text-lg md:text-xl text-gray-600">
+                Built with deep understanding, tested with real students
+              </p>
+            </div>
+
+            {/* Empathy Mapping */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="mb-12"
+            >
+              <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <div className="p-3 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl">
+                      <span className="text-3xl">🧩</span>
+                    </div>
+                    We Started by Listening
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    We spoke with 50+ students across different campuses to understand their daily mental health struggles. 
+                    Our empathy maps revealed feelings of pressure, isolation, and digital burnout.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <motion.div whileTap={{ scale: 0.98 }} className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
+                      <div className="text-4xl mb-2">😰</div>
+                      <h4 className="font-semibold text-purple-900 mb-1">The Overthinker</h4>
+                      <p className="text-sm text-purple-700">"Feels anxious about grades."</p>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+                      <div className="text-4xl mb-2">🤐</div>
+                      <h4 className="font-semibold text-blue-900 mb-1">The Silent Struggler</h4>
+                      <p className="text-sm text-blue-700">"Keeps emotions bottled up."</p>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="p-4 rounded-xl bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200">
+                      <div className="text-4xl mb-2">😊</div>
+                      <h4 className="font-semibold text-pink-900 mb-1">The Performer</h4>
+                      <p className="text-sm text-pink-700">"Always looks fine but isn't inside."</p>
+                    </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Research Insights */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="mb-12"
+            >
+              <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl">
+                      <span className="text-3xl">📊</span>
+                    </div>
+                    What We Discovered
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <motion.div whileTap={{ scale: 0.98 }} className="text-center p-6 rounded-2xl bg-gradient-to-br from-teal-50 to-teal-100">
+                      <div className="text-5xl font-bold text-teal-600 mb-2">72%</div>
+                      <p className="text-sm text-gray-700">said they fear judgment when talking about mental health</p>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="text-center p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100">
+                      <div className="text-5xl font-bold text-purple-600 mb-2">64%</div>
+                      <p className="text-sm text-gray-700">said therapy feels too formal</p>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="text-center p-6 rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100">
+                      <div className="text-5xl font-bold text-pink-600 mb-2">81%</div>
+                      <p className="text-sm text-gray-700">prefer peer-based emotional support</p>
+                    </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Real Voices */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="mb-12"
+            >
+              <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <div className="p-3 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl">
+                      <span className="text-3xl">💬</span>
+                    </div>
+                    What Students Told Us
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <motion.div whileTap={{ scale: 0.98 }} className="p-5 rounded-xl bg-white border-2 border-purple-100 shadow-sm">
+                      <p className="text-gray-700 italic">"Sometimes I just need to vent without being judged."</p>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="p-5 rounded-xl bg-white border-2 border-blue-100 shadow-sm">
+                      <p className="text-gray-700 italic">"I don't want advice, I just want someone to listen."</p>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="p-5 rounded-xl bg-white border-2 border-pink-100 shadow-sm">
+                      <p className="text-gray-700 italic">"This feels more human than any wellness app I've tried."</p>
+                    </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Testing & Feedback */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="mb-12"
+            >
+              <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl">
+                      <span className="text-3xl">🧠</span>
+                    </div>
+                    Built with Students, for Students
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    Our prototype was tested with 10 early users. Based on their feedback, we added features like 
+                    gentle color palettes, anonymous groups, and gamified motivation streaks.
+                  </p>
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <motion.div whileTap={{ scale: 0.98 }} className="flex-1 text-center p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
+                      <div className="text-3xl mb-2">🔬</div>
+                      <h4 className="font-semibold text-blue-900">Test</h4>
+                      <p className="text-xs text-blue-700">Prototype with users</p>
+                    </motion.div>
+                    <div className="text-2xl text-gray-400">→</div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="flex-1 text-center p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
+                      <div className="text-3xl mb-2">💭</div>
+                      <h4 className="font-semibold text-purple-900">Feedback</h4>
+                      <p className="text-xs text-purple-700">Listen & learn</p>
+                    </motion.div>
+                    <div className="text-2xl text-gray-400">→</div>
+                    <motion.div whileTap={{ scale: 0.98 }} className="flex-1 text-center p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100">
+                      <div className="text-3xl mb-2">✨</div>
+                      <h4 className="font-semibold text-green-900">Improve</h4>
+                      <p className="text-xs text-green-700">Iterate & enhance</p>
+                    </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Future Research Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="border-0 bg-gradient-to-br from-purple-100 via-blue-100 to-teal-100 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <div className="p-3 bg-gradient-to-br from-teal-500 to-purple-600 rounded-2xl">
+                      <span className="text-3xl">🌍</span>
+                    </div>
+                    The Road Ahead
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    We're expanding research to rural campuses and planning counselor collaboration for deeper impact. 
+                    Mental health support should reach every student, everywhere.
+                  </p>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-purple-700 mb-3">🌿 Your voice matters. Share your story</p>
+                    <Button className="bg-gradient-to-r from-teal-500 to-purple-600 hover:from-teal-600 hover:to-purple-700 text-white shadow-md">
+                      Submit Anonymously
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </motion.div>
+
         {/* Features Section - Mobile-First */}
         <motion.div
           id="features"
