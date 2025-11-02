@@ -54,6 +54,7 @@
     "crud": "link:convex-helpers/server/crud",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "face-api.js": "^0.22.2",
     "framer-motion": "^12.15.0",
     "hono": "^4.7.11",
     "input-otp": "^1.4.2",
