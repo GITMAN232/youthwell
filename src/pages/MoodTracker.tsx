@@ -31,6 +31,15 @@ const emotionToMood: Record<string, { value: string; emoji: string; label: strin
   disgusted: { value: "okay", emoji: "😐", label: "Okay" },
 };
 
+// Mood value mapping for graph
+const moodValueMap: Record<string, number> = {
+  struggling: 1,
+  low: 2,
+  okay: 3,
+  good: 4,
+  great: 5,
+};
+
 export default function MoodTracker() {
   const { isLoading, isAuthenticated } = useAuth();
   const logMood = useMutation(api.moods.logMood);
@@ -191,6 +200,14 @@ export default function MoodTracker() {
     }
   };
 
+  // Prepare data for mood graph (last 7 days)
+  const moodGraphData = recentMoods?.slice(0, 7).reverse().map((mood) => ({
+    date: new Date(mood._creationTime).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    value: moodValueMap[mood.mood] || 3,
+    emoji: mood.emoji,
+    mood: mood.mood,
+  })) || [];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -248,6 +265,109 @@ export default function MoodTracker() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Animated Mood Graph */}
+          {moodGraphData.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="mb-8 bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                    Your Mood Journey (Last 7 Days)
+                  </CardTitle>
+                  <CardDescription>Track your emotional patterns over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative h-64 flex items-end justify-between gap-2">
+                    {/* Y-axis labels */}
+                    <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-muted-foreground pr-2">
+                      <span>😊 Great</span>
+                      <span>🙂 Good</span>
+                      <span>😐 Okay</span>
+                      <span>😔 Low</span>
+                      <span>😢 Struggling</span>
+                    </div>
+
+                    {/* Graph bars */}
+                    <div className="flex-1 flex items-end justify-around gap-2 ml-16">
+                      {moodGraphData.map((data, index) => (
+                        <motion.div
+                          key={index}
+                          className="flex flex-col items-center gap-2 flex-1"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          transition={{ 
+                            duration: 0.6, 
+                            delay: index * 0.1,
+                            type: "spring",
+                            stiffness: 100
+                          }}
+                        >
+                          <motion.div
+                            className="relative w-full bg-gradient-to-t from-purple-400 to-purple-600 rounded-t-lg shadow-lg cursor-pointer group"
+                            style={{ height: `${(data.value / 5) * 100}%` }}
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ scaleY: 0 }}
+                            animate={{ scaleY: 1 }}
+                            transition={{ 
+                              duration: 0.5, 
+                              delay: index * 0.1,
+                              type: "spring"
+                            }}
+                          >
+                            {/* Emoji tooltip on hover */}
+                            <motion.div
+                              className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-xl p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              initial={{ y: 10 }}
+                              whileHover={{ y: 0 }}
+                            >
+                              <span className="text-2xl">{data.emoji}</span>
+                              <p className="text-xs font-semibold capitalize">{data.mood}</p>
+                            </motion.div>
+                          </motion.div>
+                          
+                          {/* Date label */}
+                          <motion.span
+                            className="text-xs text-muted-foreground font-medium"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: index * 0.1 + 0.3 }}
+                          >
+                            {data.date}
+                          </motion.span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Animated trend line overlay */}
+                  <motion.div
+                    className="mt-4 p-3 bg-white/80 rounded-lg"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    <p className="text-sm text-gray-600">
+                      <strong>Insight:</strong> {
+                        moodGraphData.length >= 2 && 
+                        moodGraphData[moodGraphData.length - 1].value > moodGraphData[0].value
+                          ? "📈 Your mood is trending upward! Keep it up!"
+                          : moodGraphData.length >= 2 && 
+                            moodGraphData[moodGraphData.length - 1].value < moodGraphData[0].value
+                          ? "📉 Your mood has dipped recently. Consider reaching out for support."
+                          : "➡️ Your mood has been stable. Keep tracking to identify patterns."
+                      }
+                    </p>
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           <Card className="mb-8 bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
             <CardHeader>
