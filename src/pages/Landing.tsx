@@ -151,9 +151,19 @@ export default function Landing() {
 
               <div className="flex items-center gap-2 sm:gap-3">
                 <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-                  <motion.div whileTap={{ scale: 0.95 }}>
-                    <Button className="bg-gradient-to-r from-[#FF77E9] to-[#8B5CF6] hover:from-[#FF66E0] hover:to-[#7C4FE5] text-white shadow-md hover:shadow-lg transition-all rounded-xl px-4 py-2 sm:px-6 h-10 sm:h-auto text-sm sm:text-base">
-                      {isAuthenticated ? "Dashboard" : "Get Started"}
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <Button className="bg-gradient-to-r from-[#FF77E9] to-[#8B5CF6] hover:from-[#FF66E0] hover:to-[#7C4FE5] text-white shadow-md hover:shadow-xl transition-all duration-300 rounded-xl px-4 py-2 sm:px-6 h-10 sm:h-auto text-sm sm:text-base relative overflow-hidden group">
+                      <motion.div
+                        className="absolute inset-0 bg-white/20"
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileHover={{ scale: 2, opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                      />
+                      <span className="relative z-10">{isAuthenticated ? "Dashboard" : "Get Started"}</span>
                     </Button>
                   </motion.div>
                 </Link>
@@ -186,18 +196,40 @@ export default function Landing() {
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-10">
                   <Link to="/support-circles" className="w-full sm:w-auto">
-                    <motion.div whileTap={{ scale: 0.95 }} className="w-full">
-                      <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 h-12 sm:h-auto sm:py-6 bg-gradient-to-r from-[#FF77E9] to-[#8B5CF6] hover:from-[#FF66E0] hover:to-[#7C4FE5] shadow-md hover:shadow-lg transition-all rounded-xl text-white">
-                        <Sparkles className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
-                        Join Community
+                    <motion.div 
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      className="w-full"
+                    >
+                      <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 h-12 sm:h-auto sm:py-6 bg-gradient-to-r from-[#FF77E9] to-[#8B5CF6] hover:from-[#FF66E0] hover:to-[#7C4FE5] shadow-md hover:shadow-xl transition-all duration-300 rounded-xl text-white relative overflow-hidden group">
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
+                          initial={{ x: "-100%" }}
+                          whileHover={{ x: "100%" }}
+                          transition={{ duration: 0.6, ease: "easeInOut" }}
+                        />
+                        <Sparkles className="mr-2 h-4 sm:h-5 w-4 sm:w-5 relative z-10" />
+                        <span className="relative z-10">Join Community</span>
                       </Button>
                     </motion.div>
                   </Link>
                   <Link to="/chatbot" className="w-full sm:w-auto">
-                    <motion.div whileTap={{ scale: 0.95 }} className="w-full">
-                      <Button size="lg" variant="outline" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 h-12 sm:h-auto sm:py-6 border-2 border-purple-200 bg-white/80 hover:bg-white hover:border-purple-300 rounded-xl shadow-sm">
-                        <MessageCircle className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
-                        Try AI Companion
+                    <motion.div 
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      className="w-full"
+                    >
+                      <Button size="lg" variant="outline" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 h-12 sm:h-auto sm:py-6 border-2 border-purple-200 bg-white/80 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 hover:border-purple-400 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-purple-100/0 via-purple-100/50 to-purple-100/0"
+                          initial={{ x: "-100%" }}
+                          whileHover={{ x: "100%" }}
+                          transition={{ duration: 0.6, ease: "easeInOut" }}
+                        />
+                        <MessageCircle className="mr-2 h-4 sm:h-5 w-4 sm:w-5 relative z-10" />
+                        <span className="relative z-10">Try AI Companion</span>
                       </Button>
                     </motion.div>
                   </Link>
@@ -500,9 +532,21 @@ export default function Landing() {
                   </p>
                   <div className="text-center">
                     <p className="text-sm font-semibold text-purple-700 mb-3">🌿 Your voice matters. Share your story</p>
-                    <Button className="bg-gradient-to-r from-teal-500 to-purple-600 hover:from-teal-600 hover:to-purple-700 text-white shadow-md">
-                      Submit Anonymously
-                    </Button>
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                      <Button className="bg-gradient-to-r from-teal-500 to-purple-600 hover:from-teal-600 hover:to-purple-700 text-white shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
+                          initial={{ x: "-100%" }}
+                          whileHover={{ x: "100%" }}
+                          transition={{ duration: 0.6, ease: "easeInOut" }}
+                        />
+                        <span className="relative z-10">Submit Anonymously</span>
+                      </Button>
+                    </motion.div>
                   </div>
                 </CardContent>
               </Card>
