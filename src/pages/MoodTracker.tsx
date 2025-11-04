@@ -31,7 +31,6 @@ const emotionToMood: Record<string, { value: string; emoji: string; label: strin
   disgusted: { value: "okay", emoji: "😐", label: "Okay" },
 };
 
-// Mood value mapping for graph
 const moodValueMap: Record<string, number> = {
   struggling: 1,
   low: 2,
@@ -58,89 +57,161 @@ export default function MoodTracker() {
   const [detectedEmotion, setDetectedEmotion] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number>(0);
   const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [modelsLoading, setModelsLoading] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load Face API models
+  // Load Face API models with improved error handling
   useEffect(() => {
     const loadModels = async () => {
+      if (modelsLoaded || modelsLoading) return;
+      
+      setModelsLoading(true);
       try {
         const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model";
-        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+        
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+        ]);
+        
         setModelsLoaded(true);
+        console.log("✅ Face detection models loaded successfully");
       } catch (error) {
-        console.error("Failed to load face detection models:", error);
-        toast.error("Failed to load AI models");
+        console.error("❌ Failed to load face detection models:", error);
+        toast.error("Failed to load AI models. Please refresh the page.");
+      } finally {
+        setModelsLoading(false);
       }
     };
+    
     loadModels();
-  }, []);
+  }, [modelsLoaded, modelsLoading]);
 
   const startCamera = async () => {
+    setCameraError(null);
+    setCameraReady(false);
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "user" } 
+        video: { 
+          facingMode: "user",
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        } 
       });
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
+        
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          setCameraReady(true);
+          toast.success("Camera ready!");
+        };
       }
-      setCameraError(null);
     } catch (error) {
-      console.error("Camera access denied:", error);
-      setCameraError("Camera access denied. Please try manual input.");
+      console.error("Camera access error:", error);
+      setCameraError("Camera access denied. Please enable camera permissions or try manual input.");
       toast.error("Camera access denied");
     }
   };
 
   const stopCamera = () => {
+    if (detectionIntervalRef.current) {
+      clearInterval(detectionIntervalRef.current);
+      detectionIntervalRef.current = null;
+    }
+    
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    
+    setCameraReady(false);
   };
 
   const detectEmotion = async () => {
-    if (!videoRef.current || !modelsLoaded) return;
+    if (!videoRef.current || !modelsLoaded || !cameraReady) {
+      toast.error("Camera not ready. Please wait...");
+      return;
+    }
 
     setIsDetecting(true);
+    setDetectedEmotion(null);
+    
     try {
-      const detections = await faceapi
-        .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-        .withFaceExpressions();
+      // Run detection loop every 2 seconds
+      let detectionCount = 0;
+      const maxAttempts = 5;
+      
+      const runDetection = async () => {
+        if (!videoRef.current || detectionCount >= maxAttempts) {
+          setIsDetecting(false);
+          if (detectionCount >= maxAttempts && !detectedEmotion) {
+            toast.error("No face detected after multiple attempts. Please try again.");
+          }
+          return;
+        }
+        
+        const detections = await faceapi
+          .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceExpressions();
 
-      if (detections) {
-        const expressions = detections.expressions;
-        const maxExpression = Object.entries(expressions).reduce((a, b) => 
-          a[1] > b[1] ? a : b
-        );
+        if (detections) {
+          const expressions = detections.expressions;
+          const maxExpression = Object.entries(expressions).reduce((a, b) => 
+            a[1] > b[1] ? a : b
+          );
+          
+          const [emotion, conf] = maxExpression;
+          
+          if (conf > 0.5) { // Only accept confident detections
+            setDetectedEmotion(emotion);
+            setConfidence(conf);
+            
+            const mappedMood = emotionToMood[emotion] || emotionToMood.neutral;
+            setSelectedMood(mappedMood.value);
+            
+            setIsDetecting(false);
+            toast.success(`Detected: ${mappedMood.label} ${mappedMood.emoji} (${(conf * 100).toFixed(0)}%)`);
+            return;
+          }
+        }
         
-        const [emotion, conf] = maxExpression;
-        setDetectedEmotion(emotion);
-        setConfidence(conf);
-        
-        const mappedMood = emotionToMood[emotion] || emotionToMood.neutral;
-        setSelectedMood(mappedMood.value);
-        
-        toast.success(`Detected: ${mappedMood.label} ${mappedMood.emoji}`);
-      } else {
-        toast.error("No face detected. Please try again.");
-      }
+        detectionCount++;
+        if (detectionCount < maxAttempts) {
+          setTimeout(runDetection, 2000);
+        } else {
+          setIsDetecting(false);
+          toast.error("No clear face detected. Please position your face in the frame.");
+        }
+      };
+      
+      runDetection();
     } catch (error) {
       console.error("Detection error:", error);
       toast.error("Detection failed. Please try again.");
-    } finally {
       setIsDetecting(false);
     }
   };
 
   const handleAIDetect = () => {
+    if (!modelsLoaded) {
+      toast.error("AI models are still loading. Please wait...");
+      return;
+    }
     setShowPrivacyModal(true);
   };
 
@@ -155,11 +226,17 @@ export default function MoodTracker() {
     stopCamera();
     setDetectedEmotion(null);
     setConfidence(0);
+    setCameraError(null);
   };
 
   const handleConfirmDetection = () => {
     handleCloseAIModal();
-    toast.success("Mood detected! Add details below.");
+    toast.success("Mood detected! Add details below and log it.");
+  };
+
+  const handleRetryCamera = () => {
+    setCameraError(null);
+    startCamera();
   };
 
   if (isLoading) {
@@ -200,7 +277,6 @@ export default function MoodTracker() {
     }
   };
 
-  // Prepare data for mood graph (last 7 days)
   const moodGraphData = recentMoods?.slice(0, 7).reverse().map((mood) => ({
     date: new Date(mood._creationTime).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     value: moodValueMap[mood.mood] || 3,
@@ -224,11 +300,10 @@ export default function MoodTracker() {
           transition={{ duration: 0.5 }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold tracking-tight">Smart Mood Tracker</h1>
-            <Sparkles className="h-8 w-8 text-purple-500" />
+            <h1 className="text-4xl font-bold tracking-tight">Smart Mood Tracker 📷</h1>
           </div>
           <p className="text-muted-foreground text-lg mb-8">
-            Your face tells your story — let InnerYouth read your vibe
+            One look, one click — your mood, automatically
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -283,7 +358,6 @@ export default function MoodTracker() {
                 </CardHeader>
                 <CardContent>
                   <div className="relative h-64 flex items-end justify-between gap-2">
-                    {/* Y-axis labels */}
                     <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-muted-foreground pr-2">
                       <span>😊 Great</span>
                       <span>🙂 Good</span>
@@ -292,7 +366,6 @@ export default function MoodTracker() {
                       <span>😢 Struggling</span>
                     </div>
 
-                    {/* Graph bars */}
                     <div className="flex-1 flex items-end justify-around gap-2 ml-16">
                       {moodGraphData.map((data, index) => (
                         <motion.div
@@ -320,7 +393,6 @@ export default function MoodTracker() {
                               type: "spring"
                             }}
                           >
-                            {/* Emoji tooltip on hover */}
                             <motion.div
                               className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-xl p-2 opacity-0 group-hover:opacity-100 transition-opacity"
                               initial={{ y: 10 }}
@@ -331,7 +403,6 @@ export default function MoodTracker() {
                             </motion.div>
                           </motion.div>
                           
-                          {/* Date label */}
                           <motion.span
                             className="text-xs text-muted-foreground font-medium"
                             initial={{ opacity: 0 }}
@@ -345,7 +416,6 @@ export default function MoodTracker() {
                     </div>
                   </div>
 
-                  {/* Animated trend line overlay */}
                   <motion.div
                     className="mt-4 p-3 bg-white/80 rounded-lg"
                     initial={{ opacity: 0, x: -20 }}
@@ -375,7 +445,7 @@ export default function MoodTracker() {
                 <Camera className="h-5 w-5 text-purple-600" />
                 AI-Powered Detection
               </CardTitle>
-              <CardDescription>Let AI detect your mood automatically</CardDescription>
+              <CardDescription>InnerYouth sees how you feel, so you can heal</CardDescription>
             </CardHeader>
             <CardContent>
               <Button
@@ -384,15 +454,20 @@ export default function MoodTracker() {
                 className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
                 size="lg"
               >
-                {modelsLoaded ? (
+                {modelsLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Loading AI Models...
+                  </>
+                ) : modelsLoaded ? (
                   <>
                     <Camera className="mr-2 h-5 w-5" />
                     Auto Detect Mood
                   </>
                 ) : (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Loading AI Models...
+                    <RefreshCw className="mr-2 h-5 w-5" />
+                    Retry Loading Models
                   </>
                 )}
               </Button>
@@ -509,8 +584,8 @@ export default function MoodTracker() {
               Your Privacy Matters
             </DialogTitle>
             <DialogDescription className="text-base leading-relaxed pt-4">
-              We care about your privacy. The camera feed is analyzed only on your device — 
-              no images are saved or shared. All processing happens locally in your browser.
+              Your camera feed is processed only on your device — no images are saved or uploaded. 
+              All processing happens locally in your browser for your privacy and security.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
@@ -518,7 +593,7 @@ export default function MoodTracker() {
               Cancel
             </Button>
             <Button onClick={handlePrivacyAccept} className="bg-green-500 hover:bg-green-600">
-              Continue
+              I Understand, Continue
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -539,19 +614,34 @@ export default function MoodTracker() {
           
           <div className="flex flex-col items-center py-6 space-y-6">
             {cameraError ? (
-              <div className="text-center space-y-4">
-                <p className="text-red-500">{cameraError}</p>
-                <Button onClick={() => setShowAIModal(false)}>
-                  Try Manual Input
-                </Button>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center space-y-4 p-6 bg-red-50 rounded-xl border-2 border-red-200"
+              >
+                <p className="text-red-600 font-medium">{cameraError}</p>
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={handleRetryCamera} variant="outline">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Retry Camera
+                  </Button>
+                  <Button onClick={() => setShowAIModal(false)}>
+                    Try Manual Input
+                  </Button>
+                </div>
+              </motion.div>
             ) : (
               <>
                 <div className="relative">
                   <motion.div
-                    animate={{ scale: isDetecting ? [1, 1.05, 1] : 1 }}
+                    animate={{ 
+                      scale: isDetecting ? [1, 1.02, 1] : 1,
+                      boxShadow: isDetecting 
+                        ? ["0 0 0 0 rgba(168, 85, 247, 0.4)", "0 0 0 20px rgba(168, 85, 247, 0)", "0 0 0 0 rgba(168, 85, 247, 0)"]
+                        : "0 0 0 0 rgba(168, 85, 247, 0)"
+                    }}
                     transition={{ duration: 1.5, repeat: isDetecting ? Infinity : 0 }}
-                    className="w-80 h-80 rounded-full overflow-hidden border-4 border-purple-300 shadow-2xl"
+                    className="w-80 h-80 rounded-full overflow-hidden border-4 border-purple-300 shadow-2xl bg-gray-100"
                   >
                     <video
                       ref={videoRef}
@@ -560,39 +650,60 @@ export default function MoodTracker() {
                       muted
                       className="w-full h-full object-cover"
                     />
+                    {!cameraReady && !cameraError && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-purple-100">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-purple-500 mb-4"></div>
+                        <p className="text-purple-700 font-semibold">Starting camera...</p>
+                      </div>
+                    )}
                   </motion.div>
+                  
                   {isDetecting && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full"
                     >
-                      <p className="text-white font-semibold text-lg">
+                      <motion.p 
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="text-white font-semibold text-lg"
+                      >
                         Reading your vibe...
-                      </p>
+                      </motion.p>
                     </motion.div>
                   )}
                 </div>
 
-                {detectedEmotion && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center space-y-2 p-6 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200"
-                  >
-                    <p className="text-2xl font-bold">
-                      Detected mood: {emotionToMood[detectedEmotion]?.label} {emotionToMood[detectedEmotion]?.emoji}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Confidence: {(confidence * 100).toFixed(1)}%
-                    </p>
-                  </motion.div>
-                )}
+                <AnimatePresence mode="wait">
+                  {detectedEmotion && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                      className="text-center space-y-2 p-6 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200 w-full"
+                    >
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 0.5, repeat: 2 }}
+                        className="text-5xl mb-2"
+                      >
+                        {emotionToMood[detectedEmotion]?.emoji}
+                      </motion.div>
+                      <p className="text-2xl font-bold">
+                        Detected mood: {emotionToMood[detectedEmotion]?.label}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Confidence: {(confidence * 100).toFixed(0)}%
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <div className="flex gap-3">
                   <Button
                     onClick={detectEmotion}
-                    disabled={isDetecting}
+                    disabled={isDetecting || !cameraReady}
                     className="bg-purple-500 hover:bg-purple-600"
                   >
                     {isDetecting ? (
@@ -609,16 +720,25 @@ export default function MoodTracker() {
                   </Button>
                   
                   {detectedEmotion && (
-                    <Button
-                      onClick={handleConfirmDetection}
-                      className="bg-green-500 hover:bg-green-600"
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
                     >
-                      Confirm Mood
-                    </Button>
+                      <Button
+                        onClick={handleConfirmDetection}
+                        className="bg-green-500 hover:bg-green-600"
+                      >
+                        Confirm Mood
+                      </Button>
+                    </motion.div>
                   )}
                 </div>
               </>
             )}
+          </div>
+          
+          <div className="text-center text-xs text-muted-foreground border-t pt-4">
+            Your emotions matter — track, reflect, grow.
           </div>
         </DialogContent>
       </Dialog>
